@@ -1,0 +1,27 @@
+{
+    "elasticsearch": {
+        "client": {
+              "log": "warning"
+        },
+        "clusters": [
+            {
+                "name": "cluster1",
+                "type": "kibana",
+                "host": "http://cluster1:9200"
+
+            },
+            {
+                "name": "cluster2",
+                "type": "kibana",
+                "host": "http://cluster2:9200"
+
+            },
+            {
+                "name": "cluster3",
+                "type": "kibana",
+                "host": "http://cluster3:9200"
+            }
+        ],
+        "searchSize": 1400
+    }
+}
