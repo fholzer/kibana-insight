@@ -1,0 +1,26 @@
+{
+  "name": "kibana-housekeeping-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "babel src -d lib --source-maps",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.4",
+    "elasticsearch": "^14.2.2",
+    "express": "^4.16.3",
+    "graph.js": "^1.21.1",
+    "nconf": "^0.10.0",
+    "q": "^1.5.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-env": "^1.6.1",
+    "source-map-support": "^0.5.4"
+  }
+}

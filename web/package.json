@@ -1,0 +1,19 @@
+{
+  "name": "kibana-housekeeping-web",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "d3": "^5.1.0",
+    "graph.js": "^1.21.1",
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2",
+    "react-scripts": "1.1.4",
+    "semantic-ui-react": "^0.79.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
