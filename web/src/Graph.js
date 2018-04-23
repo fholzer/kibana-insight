@@ -10,13 +10,13 @@ export default class Graph extends Component {
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if(nextProps.cluster !== prevState.cluster) {
-            return { cluster: nextProps.cluster };
+            return { cluster: nextProps.cluster, resetForce: true };
         }
         return null;
     }
 
     componentDidMount() {
-        const rootNode = this.node
+        const rootNode = this.rootnode;
 
         var width = this.props.width,
             height = this.props.height;
@@ -67,77 +67,92 @@ export default class Graph extends Component {
 
         var graph = this.state.cluster.parts;
 
-        var link = this.container.append("g")
+        console.log("createGraph graph.nodes.length: " + graph.nodes.length);
+        console.log("createGraph graph.edges.length: " + graph.edges.length);
+
+        var links = this.container.append("g")
                 .attr("class", "links")
             .selectAll("line")
-            .data(graph.edges)
-            .enter().append("line")
-                .attr("stroke-width", 1);
+            .data(graph.edges);
 
-        var node = this.container.append("g")
+        links.exit().remove();
+
+        this.links = links = links.enter().append("line")
+                .attr("stroke-width", 1)
+            .merge(links);
+
+        var nodes = this.container.append("g")
                 .attr("class", "nodes")
             .selectAll(".node")
-            .data(graph.nodes)
-            .enter().append("g")
+            .data(graph.nodes);
+
+        nodes.exit().remove();
+
+        var nodesenter = nodes.enter().append("g")
                 .attr("class", "node")
                 .call(d3.drag()
                     .on("start", this.dragstarted)
                     .on("drag", this.dragged)
                     .on("end", this.dragended));
 
-            node.append("image")
-                .attr("xlink:href", (d) => process.env.PUBLIC_URL + "/img/" + d.type + ".svg")
-                .attr("x", -8)
-                .attr("y", -8)
-                .attr("width", 16)
-                .attr("height", 16)
-                .attr("class", "icon svg");
+        nodesenter.append("image")
+            .attr("xlink:href", (d) => process.env.PUBLIC_URL + "/img/" + d.type + ".svg")
+            .attr("x", -8)
+            .attr("y", -8)
+            .attr("width", 16)
+            .attr("height", 16)
+            .attr("class", "icon svg");
 
-            node.append("text")
-                .attr("dx", 12)
-                .attr("dy", ".35em")
-                .text(function(d) { return d.title });
+        nodesenter.append("text")
+            .attr("dx", 12)
+            .attr("dy", ".35em")
+            .text(function(d) { return d.title });
 
-            node.append("title")
-                .text(function(d) { return d.id; })
+        nodesenter.append("title")
+            .text(function(d) { return d.id; })
 
-        node.on("mouseover", (d) => {
-                    if(this.focus_node === null) {
-                    this.set_highlight(node, link, d, this.directLinkNodeFilter, this.directLinkLinkFilter);
+        nodesenter.on("mouseover", (d) => {
+                if(this.focus_node === null) {
+                    this.set_highlight(d, this.directLinkNodeFilter, this.directLinkLinkFilter);
                 }
             })
             .on("mouseout", (d) => {
                 if(this.focus_node === null) {
-                    this.exit_highlight(node, link);
+                    this.exit_highlight();
                 }
             });
 
-        node.exit().remove();
-        link.exit().remove();
+        this.nodes = nodes = nodesenter.merge(nodes);
 
         d3.select(window).on("mouseup", () => {
             this.focus_node = null;
-            this.exit_highlight(node, link);
+            this.exit_highlight();
         });
 
         console.log(graph.nodes, graph.edges);
 
         this.simulation
             .nodes(graph.nodes)
-            .on("tick", ticked);
+            .on("tick", this.ticked);
 
         this.simulation.force("link")
             .links(graph.edges);
 
-        function ticked() {
-            link
-                .attr("x1", function(d) { return d.source.x; })
-                .attr("y1", function(d) { return d.source.y; })
-                .attr("x2", function(d) { return d.target.x; })
-                .attr("y2", function(d) { return d.target.y; });
-
-            node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        if(this.state.resetForce) {
+            console.log("restart simulation")
+            this.simulation.alphaTarget(0.8).restart();
+            this.setState({ resetForce: false });
         }
+    }
+
+    ticked() {
+        this.links
+            .attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+
+        this.nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
     }
 
     dragstarted = (d) => {
@@ -162,12 +177,12 @@ export default class Graph extends Component {
     }
 
 
-    exit_highlight = (node, link) => {
+    exit_highlight = () => {
         this.svg.style("cursor","move");
 
-        node.select("image").style("opacity", null);
-        node.select("text").style("opacity", null);
-        link.style("stroke-opacity", null);
+        this.nodes.select("image").style("opacity", null);
+        this.nodes.select("text").style("opacity", null);
+        this.links.style("stroke-opacity", null);
     }
 
     directLinkNodeFilter(n1, n2) {
@@ -178,23 +193,23 @@ export default class Graph extends Component {
         return n2.source.index === n1.index || n2.target.index === n1.index;
     }
 
-    set_highlight = (node, link, d, nodeFilter, edgeFilter) => {
+    set_highlight = (d, nodeFilter, edgeFilter) => {
         this.svg.style("cursor","pointer");
         var highlight_trans = this.highlight_trans;
 
-        node.select("image").style("opacity", (o) => {
+        this.nodes.select("image").style("opacity", (o) => {
             return this.directLinkNodeFilter(d, o) ? null : highlight_trans;
         });
-        node.select("text").style("opacity", (o) => {
+        this.nodes.select("text").style("opacity", (o) => {
             return this.directLinkNodeFilter(d, o) ? null : highlight_trans;
         });
-        link.style("stroke-opacity", (o) => {
+        this.links.style("stroke-opacity", (o) => {
             return this.directLinkLinkFilter(d, o) ? null : highlight_trans;
         });
     }
     render() {
         console.log("render")
-        return <svg ref={node => this.node = node}
+        return <svg ref={node => this.rootnode = node}
         width={this.props.width} height={this.props.height}>
         </svg>
     }

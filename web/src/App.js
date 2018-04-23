@@ -91,7 +91,7 @@ class App extends Component {
                     <ClusterDetails cluster={this.state.clusterDetails} />
                 </Grid>
                 <Segment>
-                    <Graph cluster={this.state.clusterDetails} width="800" height="500"/>
+                    <Graph cluster={this.state.clusterDetails} width="1000" height="500"/>
                 </Segment>
             </Container>
             </div>
