@@ -27,14 +27,14 @@ class App extends Component {
         .then((res) => {
             if(!res.ok) {
                 console.log(res);
-                this.setState({ parts: false });
+                this.setState({ clusterDetails: false, clusterId: false });
             }
             return res.json();
         })
         .then((json) => this.processParts(clusterId, json))
         .catch((err) => {
             console.log(err);
-            this.setState({ parts: false });
+            this.setState({ clusterDetails: false, clusterId: false });
         });
     }
 
