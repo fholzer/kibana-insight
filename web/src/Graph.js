@@ -62,6 +62,8 @@ export default class Graph extends Component {
         this.simulation.stop();
         this.svg.on(".zoom", null);
         this.svg.selectAll().remove();
+        this.simulation = null;
+        this.svg = null;
     }
 
     componentDidUpdate(prevProps, prevState) {
