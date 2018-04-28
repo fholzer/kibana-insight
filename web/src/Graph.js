@@ -16,6 +16,7 @@ export default class Graph extends Component {
     }
 
     componentDidMount() {
+        console.log("componentDidMount");
         const rootNode = this.rootnode;
 
         var width = this.props.width,
@@ -29,7 +30,13 @@ export default class Graph extends Component {
 
         // needed for applying zoom and pan
         this.container = wrapper.append("g")
-            .attr("class", "everything")
+            .attr("class", "everything");
+
+        this.container.append("g")
+                .attr("class", "links");
+
+        this.container.append("g")
+                .attr("class", "nodes")
 
         // Zoom functions
         var zoom_actions = () => {
@@ -51,16 +58,21 @@ export default class Graph extends Component {
     }
 
     componentWillUnmount() {
+        console.log("componentWillUnmount");
+        this.simulation.stop();
         this.svg.on(".zoom", null);
         this.svg.selectAll().remove();
     }
 
-    componentDidUpdate() {
-        console.log("componentDidUpdate")
-        this.createGraph()
+    componentDidUpdate(prevProps, prevState) {
+        console.log("componentDidUpdate");
+        if(prevState.cluster !== this.state.cluster) {
+            this.renderGraph();
+        }
     }
 
-    createGraph() {
+    renderGraph() {
+        console.log("renderGraph");
         if(!this.state.cluster || this.state.cluster === true) {
             return;
         }
@@ -70,10 +82,9 @@ export default class Graph extends Component {
         console.log("createGraph graph.nodes.length: " + graph.nodes.length);
         console.log("createGraph graph.edges.length: " + graph.edges.length);
 
-        var links = this.container.append("g")
-                .attr("class", "links")
+        var links = this.container.select("g.links")
             .selectAll("line")
-            .data(graph.edges);
+            .data(graph.edges, (d) => d.source + d.target);
 
         links.exit().remove();
 
@@ -81,10 +92,9 @@ export default class Graph extends Component {
                 .attr("stroke-width", 1)
             .merge(links);
 
-        var nodes = this.container.append("g")
-                .attr("class", "nodes")
+        var nodes = this.container.select("g.nodes")
             .selectAll(".node")
-            .data(graph.nodes);
+            .data(graph.nodes, (d) => d.id);
 
         nodes.exit().remove();
 
@@ -145,7 +155,7 @@ export default class Graph extends Component {
         }
     }
 
-    ticked() {
+    ticked = () => {
         this.links
             .attr("x1", function(d) { return d.source.x; })
             .attr("y1", function(d) { return d.source.y; })
