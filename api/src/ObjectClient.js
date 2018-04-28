@@ -111,7 +111,7 @@ export default class ObjectClient {
             // find objects with references to missing objects
             var missing = edges.filter((e) => nodes.findIndex((n) => n.id === e.target) === -1);
             if(missing.length > 0) {
-                nodes.push({ id: TYPE.MISSING });
+                nodes.push({ id: TYPE.MISSING, type: TYPE.MISSING });
                 missing.forEach((e) => {
                     e.target = TYPE.MISSING;
                 });
