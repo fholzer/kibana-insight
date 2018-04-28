@@ -25,8 +25,7 @@ export default class Graph extends Component {
         var svg = this.svg = d3.select(rootNode);
 
         // needed to offset the simulation's center
-        var wrapper = svg.append("g")
-            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+        var wrapper = svg.append("g");
 
         // needed for applying zoom and pan
         this.container = wrapper.append("g")
@@ -48,7 +47,7 @@ export default class Graph extends Component {
         .on("zoom", zoom_actions);
 
         svg.call(zoom);
-        svg.call(zoom.transform, d3.zoomIdentity.scale(.5));
+        svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(.5));
 
         this.simulation = d3.forceSimulation()
             .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(100))
