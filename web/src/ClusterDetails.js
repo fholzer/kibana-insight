@@ -14,14 +14,17 @@ export default class ClusterDetails extends Component {
     }
 
     render() {
-        if(this.state.cluster === null) {
-            return <p>Select a Cluster</p>;
-        }
-        if(this.state.cluster === true) {
-            return <p>Loading...</p>;
-        }
         if(this.state.cluster === false) {
-            return <p>Error while loading data.</p>;
+            return;
+        }
+
+        if(this.state.cluster === null || this.state.cluster === true) {
+            return (
+                <Statistic className="objectStats">
+                    <Statistic.Value>{'\u00A0'}</Statistic.Value>
+                    <Statistic.Label>{'\u00A0'}</Statistic.Label>
+                </Statistic>
+            );
         }
 
         const stats = this.state.cluster.stats.map((s) => (
