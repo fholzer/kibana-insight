@@ -196,7 +196,7 @@ export default class Graph extends Component {
     }
 
     directLinkNodeFilter(n1, n2) {
-        return n1 === n2 || this.state.cluster.graph.hasEdge(n1.id, n2.id) || this.state.cluster.graph.hasEdge(n1.id, n2.id);
+        return n1 === n2 || this.state.cluster.graph.hasEdge(n1.id, n2.id) || this.state.cluster.graph.hasEdge(n2.id, n1.id);
     }
 
     directLinkLinkFilter(n1, n2) {
