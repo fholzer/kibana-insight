@@ -3,20 +3,19 @@ import * as d3 from "d3"
 
 export default class Graph extends Component {
     state = {
-        cluster: null
+        graph: null
     }
     focus_node = null;
     highlight_trans = 0.2;
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if(nextProps.cluster !== prevState.cluster) {
-            return { cluster: nextProps.cluster, resetForce: true };
+        if(nextProps.graph !== prevState.graph) {
+            return { graph: nextProps.graph, resetForce: true };
         }
         return null;
     }
 
     componentDidMount() {
-        console.log("componentDidMount");
         const rootNode = this.rootnode;
 
         var width = this.props.width,
@@ -51,13 +50,13 @@ export default class Graph extends Component {
 
         this.simulation = d3.forceSimulation()
             .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(100))
-            .force("charge", d3.forceManyBody().strength(-30))
+            .force("charge", d3.forceManyBody().strength(-1))
             .force("center", d3.forceCenter())
-            .force("collision", d3.forceCollide(16));
+            .force("collision", d3.forceCollide(16))
+            .alphaTarget(0.8);
     }
 
     componentWillUnmount() {
-        console.log("componentWillUnmount");
         this.simulation.stop();
         this.svg.on(".zoom", null);
         this.svg.selectAll().remove();
@@ -66,22 +65,19 @@ export default class Graph extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        console.log("componentDidUpdate");
-        if(prevState.cluster !== this.state.cluster) {
+        if(prevState.graph !== this.state.graph) {
             this.renderGraph();
         }
     }
 
     renderGraph() {
-        console.log("renderGraph");
-        if(!this.state.cluster || this.state.cluster === true) {
+        if(!this.state.graph || this.state.graph === true) {
             return;
         }
 
-        var graph = this.state.cluster.parts;
+        this.simulation.stop();
 
-        console.log("createGraph graph.nodes.length: " + graph.nodes.length);
-        console.log("createGraph graph.edges.length: " + graph.edges.length);
+        var graph = this.state.graph.toD3();
 
         var links = this.container.select("g.links")
             .selectAll("line")
@@ -140,8 +136,6 @@ export default class Graph extends Component {
             this.exit_highlight();
         });
 
-        console.log(graph.nodes, graph.edges);
-
         this.simulation
             .nodes(graph.nodes)
             .on("tick", this.ticked);
@@ -149,11 +143,8 @@ export default class Graph extends Component {
         this.simulation.force("link")
             .links(graph.edges);
 
-        if(this.state.resetForce) {
-            console.log("restart simulation")
-            this.simulation.alphaTarget(0.8).restart();
-            this.setState({ resetForce: false });
-        }
+        this.simulation.alphaTarget(0.8).restart();
+        this.setState({ resetForce: false });
     }
 
     ticked = () => {
@@ -197,7 +188,7 @@ export default class Graph extends Component {
     }
 
     directLinkNodeFilter(n1, n2) {
-        return n1 === n2 || this.state.cluster.graph.hasEdge(n1.id, n2.id) || this.state.cluster.graph.hasEdge(n2.id, n1.id);
+        return n1 === n2 || this.state.graph.hasEdge(n1.id, n2.id) || this.state.graph.hasEdge(n2.id, n1.id);
     }
 
     directLinkLinkFilter(n1, n2) {
@@ -219,7 +210,6 @@ export default class Graph extends Component {
         });
     }
     render() {
-        console.log("render")
         return <svg ref={node => this.rootnode = node}
         width={this.props.width} height={this.props.height}>
         </svg>

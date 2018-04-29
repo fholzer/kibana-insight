@@ -9,22 +9,23 @@ const FILTER_NONE = Object.freeze({
 
 export default class FilterSelector extends Component {
     state = {
-        cluster: null,
+        graph: null,
         filter: "null"
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if((nextProps.cluster !== prevState.cluster ||
+        if((nextProps.graph !== prevState.graph ||
             nextProps.type !== prevState.type) &&
-            nextProps.cluster &&
-            nextProps.cluster !== true &&
+            nextProps.graph &&
             nextProps.type) {
-            const options = nextProps.cluster.parts.nodes
-                .filter((n) => n.type === nextProps.type)
+            const options = nextProps.graph.toD3().nodes
+                .filter((n) => nextProps.type.indexOf(n.type) !== -1)
                 .map((n) => ({ key: n.id, text: n.title, value: n.id }))
                 .concat(FILTER_NONE);
 
             return {
+                graph: nextProps.graph,
+                type: nextProps.type,
                 options,
                 filter: "null"
             };
@@ -33,14 +34,14 @@ export default class FilterSelector extends Component {
     }
 
     onFilterChange = (e, { value }) => {
-        if(typeof this.props.onFilterChange === 'function') {
-            this.props.onFilterChange(value === "null" ? null : value);
-        }
         this.setState({ filter: value });
+        if(typeof this.props.onFilterChange === 'function') {
+            this.props.onFilterChange(this.props.type, value === "null" ? null : value);
+        }
     }
 
     render() {
-        const options = this.state.options ? this.state.options : [FILTER_NONE]
+        const options = this.state.options ? this.state.options : [FILTER_NONE];
 
         return <Dropdown
             selection

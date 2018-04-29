@@ -8,6 +8,9 @@ import ClusterDetails from './ClusterDetails';
 import ObjectGraph from './ObjectGraph';
 import TYPE from './ObjectTypes';
 
+const FILTER_DASHBOARD = [TYPE.DASHBOARD];
+const FILTER_INDEX = [TYPE.INDEX_PATTERN, TYPE.MISSING];
+
 class App extends Component {
     state = {
         clusterId: null,
@@ -58,6 +61,7 @@ class App extends Component {
         stats.push({
             key: TYPE.MISSING,
             label: "Broken References",
+            type: "missing",
             value: parts.edges.filter((e) => e.target === TYPE.MISSING).length
         });
 
@@ -68,11 +72,51 @@ class App extends Component {
                 parts,
                 stats,
                 graph
-            }
+            },
+            filteredGraph: graph,
+            filterDashboard: null,
+            filterIndex: null
+        });
+    }
+
+    updateFilteredGraph(filtered) {
+        this.setState({ filteredGraph: filtered });
+    }
+
+    onFilterChange = (type, value) => {
+        switch(type[0]) {
+            case TYPE.DASHBOARD:
+                this.applyFilters(value, this.state.filterIndex);
+                break;
+            case TYPE.INDEX_PATTERN:
+                this.applyFilters(this.state.filterDashboard, value);
+                break;
+        }
+    }
+
+    applyFilters(dashboard, index) {
+        if(this.state.clusterDetails === null) {
+            return;
+        }
+        var graph = this.state.clusterDetails.graph;
+
+        if(dashboard !== null) {
+            graph = graph.filterForSource(dashboard);
+        }
+
+        if(index !== null) {
+            graph = graph.filterForSink(index);
+        }
+
+        this.setState({
+            filteredGraph: graph,
+            filterDashboard: dashboard,
+            filterIndex: index
         });
     }
 
     render() {
+        const graph = this.state.clusterDetails === null ? null : this.state.clusterDetails.graph;
         return (
             <div>
             <Menu>
@@ -80,10 +124,10 @@ class App extends Component {
                     Cluster: <ClusterSelector onClusterSelect={this.onClusterSelect}/>
                 </Menu.Item>
                 <Menu.Item>
-                    Filter Dashboards: <FilterSelector type={TYPE.DASHBOARD} cluster={this.state.clusterDetails} onFilterSelect={this.onFilterSelect}/>
+                    Filter Dashboards: <FilterSelector type={FILTER_DASHBOARD} graph={graph} onFilterChange={this.onFilterChange}/>
                 </Menu.Item>
                 <Menu.Item>
-                    Filter Index Patterns:{' '}<FilterSelector type={TYPE.INDEX_PATTERN} cluster={this.state.clusterDetails} onFilterSelect={this.onFilterSelect}/>
+                    Filter Index Patterns:{' '}<FilterSelector type={FILTER_INDEX} graph={graph} onFilterChange={this.onFilterChange}/>
                 </Menu.Item>
             </Menu>
             <Container style={{ marginTop: '3em' }}>
@@ -91,7 +135,7 @@ class App extends Component {
                     <ClusterDetails cluster={this.state.clusterDetails} />
                 </Grid>
                 <Segment>
-                    <Graph cluster={this.state.clusterDetails} width="1000" height="500"/>
+                    <Graph graph={this.state.filteredGraph} width="1000" height="500"/>
                 </Segment>
             </Container>
             </div>

@@ -6,9 +6,8 @@ export default class ObjectGraph {
 
     static fromParts(parts) {
         return new ObjectGraph(new Graph(
-            ...parts.nodes.map((n) => [n.id, n]).concat(
-                parts.edges.map((e) => [[e.source, e.target], e])
-            )
+            ...parts.nodes.map((n) => [n.id, n]),
+            ...parts.edges.map((e) => [[e.source, e.target], e])
         ));
     }
 
@@ -22,6 +21,10 @@ export default class ObjectGraph {
 
     filterForSink(sinkId) {
         var res = new Graph();
+
+        if(!this.graph.hasVertex(sinkId)) {
+            return new ObjectGraph(res);
+        }
 
         for(let [key, value] of this.graph.verticesWithPathTo(sinkId)) {
             res.ensureVertex(key, value);
@@ -43,18 +46,22 @@ export default class ObjectGraph {
     filterForSource(sourceId) {
         var res = new Graph();
 
+        if(!this.graph.hasVertex(sourceId)) {
+            return new ObjectGraph(res);
+        }
+
         for(let [key, value] of this.graph.verticesWithPathFrom(sourceId)) {
             res.ensureVertex(key, value);
         }
         res.ensureVertex(sourceId, this.graph.vertexValue(sourceId));
 
         for(let [key, ] of this.graph.verticesWithPathFrom(sourceId)) {
-            for (let [from, , edgeValue] of this.graph.verticesFrom(key)) {
-                res.ensureEdge(from, key, edgeValue);
+            for (let [to, , edgeValue] of this.graph.verticesFrom(key)) {
+                res.ensureEdge(key, to, edgeValue);
             }
         }
-        for(let [from, , edgeValue] of this.graph.verticesFrom(sourceId)) {
-            res.ensureEdge(from, sourceId, edgeValue);
+        for(let [to, , edgeValue] of this.graph.verticesFrom(sourceId)) {
+            res.ensureEdge(sourceId, to, edgeValue);
         }
 
         return new ObjectGraph(res);
