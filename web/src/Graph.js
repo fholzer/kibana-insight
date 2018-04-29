@@ -18,9 +18,6 @@ export default class Graph extends Component {
     componentDidMount() {
         const rootNode = this.rootnode;
 
-        var width = this.props.width,
-            height = this.props.height;
-
         var svg = this.svg = d3.select(rootNode);
 
         // needed to offset the simulation's center
@@ -46,7 +43,8 @@ export default class Graph extends Component {
         .on("zoom", zoom_actions);
 
         svg.call(zoom);
-        svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(.5));
+        var rect = svg.node().getBoundingClientRect();
+        svg.call(zoom.transform, d3.zoomIdentity.translate(rect.width / 2, rect.height / 2).scale(.5));
 
         this.simulation = d3.forceSimulation()
             .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(100))
@@ -211,7 +209,7 @@ export default class Graph extends Component {
     }
     render() {
         return <svg ref={node => this.rootnode = node}
-        width={this.props.width} height={this.props.height}>
+        width="100%" height="100%">
         </svg>
     }
 }
