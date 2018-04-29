@@ -20,6 +20,7 @@ export default class FilterSelector extends Component {
             nextProps.type) {
             const options = nextProps.graph.toD3().nodes
                 .filter((n) => nextProps.type.indexOf(n.type) !== -1)
+                .sort(FilterSelector.objectTitleComparator)
                 .map((n) => ({ key: n.id, text: n.title, value: n.id }))
                 .concat(FILTER_NONE);
 
@@ -31,6 +32,14 @@ export default class FilterSelector extends Component {
             };
         }
         return null;
+    }
+
+    static objectTitleComparator(s1, s2) {
+        if(!s1.title || !s2.title) {
+            console.log("has no title:", s1, s2);
+            return 0;
+        }
+        return s1.title.localeCompare(s2.title);
     }
 
     onFilterChange = (e, { value }) => {
