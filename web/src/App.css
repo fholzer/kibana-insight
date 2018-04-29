@@ -44,3 +44,7 @@
 .objectStats img {
     width: 1.5rem;
 }
+
+.menu .ui.dropdown {
+    margin-left: .5rem;
+}

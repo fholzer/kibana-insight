@@ -124,10 +124,10 @@ class App extends Component {
                     Cluster: <ClusterSelector onClusterSelect={this.onClusterSelect}/>
                 </Menu.Item>
                 <Menu.Item>
-                    Filter Dashboards: <FilterSelector type={FILTER_DASHBOARD} graph={graph} onFilterChange={this.onFilterChange}/>
+                    Filter Dashboards:<FilterSelector type={FILTER_DASHBOARD} graph={graph} onFilterChange={this.onFilterChange}/>
                 </Menu.Item>
                 <Menu.Item>
-                    Filter Index Patterns:{' '}<FilterSelector type={FILTER_INDEX} graph={graph} onFilterChange={this.onFilterChange}/>
+                    Filter Index Patterns:<FilterSelector type={FILTER_INDEX} graph={graph} onFilterChange={this.onFilterChange}/>
                 </Menu.Item>
             </Menu>
             <Container style={{ marginTop: '3em' }}>
