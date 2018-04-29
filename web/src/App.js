@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Menu, Container, Grid, Segment } from 'semantic-ui-react';
+import { Menu, Container, Grid, Segment, Checkbox } from 'semantic-ui-react';
 import Graph from './Graph';
 import ClusterSelector from './ClusterSelector';
 import FilterSelector from './FilterSelector';
@@ -14,7 +14,8 @@ const FILTER_INDEX = [TYPE.INDEX_PATTERN, TYPE.MISSING];
 class App extends Component {
     state = {
         clusterId: null,
-        clusterDetails: null
+        clusterDetails: null,
+        filterOrphaned: false
     }
 
     onClusterSelect = (id, name) => {
@@ -61,7 +62,6 @@ class App extends Component {
         stats.push({
             key: TYPE.MISSING,
             label: "Broken References",
-            type: "missing",
             value: parts.edges.filter((e) => e.target === TYPE.MISSING).length
         });
 
@@ -86,21 +86,40 @@ class App extends Component {
     onFilterChange = (type, value) => {
         switch(type[0]) {
             case TYPE.DASHBOARD:
-                this.applyFilters(value, this.state.filterIndex);
+                this.applyFilters(value);
                 break;
             case TYPE.INDEX_PATTERN:
-                this.applyFilters(this.state.filterDashboard, value);
+                this.applyFilters(undefined, value);
                 break;
             default:
                 throw new Error("Unexpected type " + type[0]);
         }
     }
 
-    applyFilters(dashboard, index) {
+    onFilterOrphanedChange = (e, { checked }) => {
+        this.applyFilters(undefined, undefined, checked);
+    }
+
+    applyFilters(dashboard, index, orphaned) {
         if(this.state.clusterDetails === null) {
             return;
         }
+
+        if(dashboard === undefined) {
+            dashboard = this.state.filterDashboard;
+        }
+        if(index === undefined) {
+            index = this.state.filterIndex;
+        }
+        if(orphaned === undefined) {
+            orphaned = this.state.filterOrphaned;
+        }
+
         var graph = this.state.clusterDetails.graph;
+
+        if(orphaned) {
+            graph = graph.filterForOrphanedNodes();
+        }
 
         if(dashboard !== null) {
             graph = graph.filterForSource(dashboard);
@@ -113,7 +132,8 @@ class App extends Component {
         this.setState({
             filteredGraph: graph,
             filterDashboard: dashboard,
-            filterIndex: index
+            filterIndex: index,
+            filterOrphaned: orphaned
         });
     }
 
@@ -126,10 +146,13 @@ class App extends Component {
                     Cluster: <ClusterSelector onClusterSelect={this.onClusterSelect}/>
                 </Menu.Item>
                 <Menu.Item>
-                    Filter Dashboards:<FilterSelector type={FILTER_DASHBOARD} graph={graph} onFilterChange={this.onFilterChange}/>
+                    <Checkbox checked={this.state.filterOrphaned} onChange={this.onFilterOrphanedChange} label="Orphaned" />
                 </Menu.Item>
                 <Menu.Item>
-                    Filter Index Patterns:<FilterSelector type={FILTER_INDEX} graph={graph} onFilterChange={this.onFilterChange}/>
+                    Dashboards:<FilterSelector type={FILTER_DASHBOARD} graph={graph} onFilterChange={this.onFilterChange}/>
+                </Menu.Item>
+                <Menu.Item>
+                    Index Patterns:<FilterSelector type={FILTER_INDEX} graph={graph} onFilterChange={this.onFilterChange}/>
                 </Menu.Item>
             </Menu>
             <Container style={{ marginTop: '3em' }}>

@@ -68,18 +68,23 @@ export default class ObjectGraph {
     }
 
     removeOrphanedNodes() {
+        return new ObjectGraph(this.calculateOrphanedNodes()[0]);
+    }
+
+    filterForOrphanedNodes() {
+        return new ObjectGraph(this.calculateOrphanedNodes()[1]);
+    }
+
+    calculateOrphanedNodes() {
         var res = this.graph.clone(),
             removed = new Graph(),
-            changed,
-            toRemove = { nodes: [], nodeIds: [], edges: [] };
+            changed;
         do {
             changed = false;
             for(let [id, n] of res.sources()) {
                 if(n.type === TYPE.DASHBOARD) {
                     continue;
                 }
-                toRemove.nodes.push(n);
-                toRemove.nodeIds.push(id);
                 removed.ensureVertex(id, this.graph.vertexValue(id));
                 res.destroyVertex(id);
                 changed = true;
@@ -90,7 +95,7 @@ export default class ObjectGraph {
                 removed.ensureEdge(from, to, e)
             }
         }
-        return res;
+        return [res, removed];
     }
 
     hasEdge(from, to) {
