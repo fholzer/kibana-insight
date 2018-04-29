@@ -91,6 +91,8 @@ class App extends Component {
             case TYPE.INDEX_PATTERN:
                 this.applyFilters(this.state.filterDashboard, value);
                 break;
+            default:
+                throw new Error("Unexpected type " + type[0]);
         }
     }
 
