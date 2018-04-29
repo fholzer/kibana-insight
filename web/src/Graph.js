@@ -207,6 +207,7 @@ export default class Graph extends Component {
     }
     render() {
         return <svg ref={node => this.rootnode = node}
+        style={{minHeight: "500px"}}
         width="100%" height="100%">
         </svg>
     }

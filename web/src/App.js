@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Menu, Container, Grid, Segment, Checkbox } from 'semantic-ui-react';
+import { Menu, Container, Grid, Segment, Divider, Checkbox } from 'semantic-ui-react';
 import Graph from './Graph';
 import ClusterSelector from './ClusterSelector';
 import FilterSelector from './FilterSelector';
-import ClusterDetails from './ClusterDetails';
 import ObjectGraph from './ObjectGraph';
+import ObjectList from './ObjectList';
+import GraphStats from './GraphStats';
 import TYPE from './ObjectTypes';
 
 const FILTER_DASHBOARD = [TYPE.DASHBOARD];
@@ -74,6 +75,7 @@ class App extends Component {
                 graph
             },
             filteredGraph: graph,
+            filterOrphaned: false,
             filterDashboard: null,
             filterIndex: null
         });
@@ -139,6 +141,27 @@ class App extends Component {
 
     render() {
         const graph = this.state.clusterDetails === null ? null : this.state.clusterDetails.graph;
+        const content = graph === null ? null : (
+            <Container style={{ marginTop: '3em' }}>
+                <Grid centered>
+                    <GraphStats graph={graph} size="tiny"/>
+                </Grid>
+                <Segment>
+                    <Grid columns="equal">
+                        <Grid.Column width={10}>
+                            <Graph graph={this.state.filteredGraph}/>
+                        </Grid.Column>
+                        <Grid.Column width={6}>
+                            <Segment>
+                                <GraphStats graph={this.state.filteredGraph} size="mini" />
+                            </Segment>
+                            <Divider/>
+                            <ObjectList graph={this.state.filteredGraph} />
+                        </Grid.Column>
+                    </Grid>
+                </Segment>
+            </Container>
+        );
         return (
             <div>
             <Menu>
@@ -155,14 +178,7 @@ class App extends Component {
                     Index Patterns:<FilterSelector type={FILTER_INDEX} graph={graph} onFilterChange={this.onFilterChange}/>
                 </Menu.Item>
             </Menu>
-            <Container style={{ marginTop: '3em' }}>
-                <Grid centered>
-                    <ClusterDetails cluster={this.state.clusterDetails} />
-                </Grid>
-                <Segment>
-                    <Graph graph={this.state.filteredGraph} width="1000" height="500"/>
-                </Segment>
-            </Container>
+            {content}
             </div>
         );
     }

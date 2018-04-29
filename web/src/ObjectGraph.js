@@ -2,7 +2,8 @@ import Graph from 'graph.js/dist/graph.full.js';
 import TYPE from './ObjectTypes';
 
 export default class ObjectGraph {
-    cache = null;
+    cachedParts = null;
+    cachedStats = null;
 
     static fromParts(parts) {
         return new ObjectGraph(new Graph(
@@ -98,13 +99,46 @@ export default class ObjectGraph {
         return [res, removed];
     }
 
+    calculateStats() {
+        if(this.cachedStats !== null) {
+            return this.cachedStats;
+        }
+
+        const TYPE_TRANSLATION = {
+            "dashboard": "Dashboards",
+            "visualization": "Visualizations",
+            "search": "Searches",
+            "index-pattern": "Index Patterns",
+        }
+        const parts = this.toD3();
+
+        const stats = [
+            TYPE.DASHBOARD,
+            TYPE.VISUALIZATION,
+            TYPE.SEARCH,
+            TYPE.INDEX_PATTERN
+        ].map((t) => ({
+            key: t,
+            label: TYPE_TRANSLATION[t],
+            value: parts.nodes.filter((n) => n.type === t).length
+        }));
+
+        stats.push({
+            key: TYPE.MISSING,
+            label: "Broken References",
+            value: parts.edges.filter((e) => e.target === TYPE.MISSING).length
+        });
+
+        return this.cachedStats = stats;
+    }
+
     hasEdge(from, to) {
         return this.graph.hasEdge(from, to);
     }
 
     toD3() {
-        if(this.cache !== null) {
-            return this.cache;
+        if(this.cachedParts !== null) {
+            return this.cachedParts;
         }
 
         var nodes = [],
@@ -116,6 +150,6 @@ export default class ObjectGraph {
         for (let [from, to, ] of this.graph.edges()) {
             edges.push({ source: from, target: to, weight: 1});
         }
-        return this.cache = { nodes: nodes, edges: edges };
+        return this.cachedParts = { nodes: nodes, edges: edges };
     }
 }

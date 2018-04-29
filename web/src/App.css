@@ -1,3 +1,7 @@
+body {
+    overflow-y: scroll;
+}
+
 .App {
   text-align: center;
 }
@@ -41,8 +45,9 @@
     fill: black
 }
 
-.objectStats img {
+.objectStats img, .objectList img {
     width: 1.5rem;
+    margin-right: 0.25rem;
 }
 
 .menu .ui.dropdown {

@@ -1,24 +1,20 @@
 import React, { Component } from 'react';
 import { Statistic, Image } from 'semantic-ui-react';
 
-export default class ClusterDetails extends Component {
+export default class GraphStats extends Component {
     state = {
-        cluster: null
+        graph: null
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if(nextProps.cluster !== prevState.cluster) {
-            return { cluster: nextProps.cluster };
+        if(nextProps.graph !== prevState.graph) {
+            return { graph: nextProps.graph };
         }
         return null;
     }
 
     render() {
-        if(this.state.cluster === false) {
-            return;
-        }
-
-        if(this.state.cluster === null || this.state.cluster === true) {
+        if(!this.state.graph) {
             return (
                 <Statistic className="objectStats">
                     <Statistic.Value>{'\u00A0'}</Statistic.Value>
@@ -27,7 +23,7 @@ export default class ClusterDetails extends Component {
             );
         }
 
-        const stats = this.state.cluster.stats.map((s) => (
+        const stats = this.state.graph.calculateStats().map((s) => (
             <Statistic key={s.key} className="objectStats">
                 <Statistic.Value>
                     <Image src={process.env.PUBLIC_URL + "/img/" + s.key + ".svg"} inline /> {s.value}
@@ -36,8 +32,10 @@ export default class ClusterDetails extends Component {
             </Statistic>
         ))
 
-        return <Statistic.Group size="tiny">
-            {stats}
-            </Statistic.Group>;
+        return (
+            <Statistic.Group size={this.props.size}>
+                {stats}
+            </Statistic.Group>
+        );
     }
 }
