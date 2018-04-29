@@ -10,7 +10,7 @@ export default class Graph extends Component {
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if(nextProps.graph !== prevState.graph) {
-            return { graph: nextProps.graph, resetForce: true };
+            return { graph: nextProps.graph };
         }
         return null;
     }
@@ -50,8 +50,7 @@ export default class Graph extends Component {
             .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(100))
             .force("charge", d3.forceManyBody().strength(-1))
             .force("center", d3.forceCenter())
-            .force("collision", d3.forceCollide(16))
-            .alphaTarget(0.8);
+            .force("collision", d3.forceCollide(16));
     }
 
     componentWillUnmount() {
@@ -141,8 +140,7 @@ export default class Graph extends Component {
         this.simulation.force("link")
             .links(graph.edges);
 
-        this.simulation.alphaTarget(0.8).restart();
-        this.setState({ resetForce: false });
+        this.simulation.alpha(1).restart();
     }
 
     ticked = () => {
@@ -158,7 +156,7 @@ export default class Graph extends Component {
     dragstarted = (d) => {
         this.focus_node = d;
         if (!d3.event.active) {
-            this.simulation.alphaTarget(0.1).restart();
+            this.simulation.alpha(1).restart();
         }
         d.fx = d.x;
         d.fy = d.y;
@@ -171,7 +169,7 @@ export default class Graph extends Component {
 
     dragended = (d) => {
         this.focus_node = null;
-        if (!d3.event.active) this.simulation.alphaTarget(0);
+        if (!d3.event.active) this.simulation.alpha(1);
         d.fx = null;
         d.fy = null;
     }
