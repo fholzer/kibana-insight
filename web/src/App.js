@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import Config from './Config';
 import { Menu, Container, Grid, Segment, Divider, Checkbox } from 'semantic-ui-react';
 import Graph from './Graph';
 import ClusterSelector from './ClusterSelector';
@@ -28,7 +29,7 @@ class App extends Component {
     }
 
     loadParts(clusterId) {
-        fetch('http://127.0.0.1:3001/clusters/' + clusterId + '/parts')
+        fetch(Config.apiBaseUrl + '/clusters/' + clusterId + '/parts')
         .then((res) => {
             if(!res.ok) {
                 console.log(res);

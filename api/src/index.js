@@ -12,14 +12,8 @@ const config = nconf.argv()
 
 const clients = config.elasticsearch.clusters.map((c) => new ObjectClient(config.elasticsearch, c));
 
-const corsOptions = {
-  origin: 'http://localhost:3000',
-  optionsSuccessStatus: 200
-};
-
 const app = express();
-app.use(cors(corsOptions));
-//app.options('*', cors())
+app.use(cors(config.cors));
 app.get('/clusters', (req, res) => res.json(config.elasticsearch.clusters.map((h) => h.name)));
 
 app.get('/clusters/:id', function(req, res) {

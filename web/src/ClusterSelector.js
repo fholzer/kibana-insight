@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Config from './Config';
 import { Dropdown } from 'semantic-ui-react';
 
 export default class ClusterSelector extends Component {
@@ -7,7 +8,7 @@ export default class ClusterSelector extends Component {
     }
 
     componentDidMount() {
-        fetch('http://127.0.0.1:3001/clusters')
+        fetch(Config.apiBaseUrl + '/clusters')
         .then((res) => {
             if(!res.ok) {
                 console.log(res);
