@@ -66,31 +66,5 @@ export default class ObjectList extends Component {
         return (
             <List className="objectList">{stats}</List>
         );
-
-
-        const sstats = [
-            TYPE.DASHBOARD,
-            TYPE.VISUALIZATION,
-            TYPE.SEARCH,
-            TYPE.INDEX_PATTERN
-        ].map((t) => (
-            <List.Item key={t}>
-                <List.Header>{TYPE_TRANSLATION[t]}</List.Header>
-                <List.List>{
-                    parts.nodes.filter((n) => n.type === t)
-                        .sort(ObjectList.objectTitleComparator)
-                        .map((n) => ((
-                            <List.Item key={n.id}>
-                                <List.Header>{n.title}</List.Header>
-                                <List.Description>{n.id}</List.Description>
-                            </List.Item>
-                        )))
-                }</List.List>
-            </List.Item>
-        ));
-
-        return (
-            <List>{stats}</List>
-        );
     }
 }

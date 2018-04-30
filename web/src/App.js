@@ -45,34 +45,11 @@ class App extends Component {
     }
 
     processParts(clusterId, parts) {
-        const TYPE_TRANSLATION = {
-            "dashboard": "Dashboards",
-            "visualization": "Visualizations",
-            "search": "Searches",
-            "index-pattern": "Index Patterns",
-        }
-        const stats = [
-            TYPE.DASHBOARD,
-            TYPE.VISUALIZATION,
-            TYPE.SEARCH,
-            TYPE.INDEX_PATTERN
-        ].map((t) => ({
-            key: t,
-            label: TYPE_TRANSLATION[t],
-            value: parts.nodes.filter((n) => n.type === t).length
-        }));
-        stats.push({
-            key: TYPE.MISSING,
-            label: "Broken References",
-            value: parts.edges.filter((e) => e.target === TYPE.MISSING).length
-        });
-
         var graph = ObjectGraph.fromParts(parts);
         this.setState({
             clusterDetails: {
                 clusterId,
                 parts,
-                stats,
                 graph
             },
             filteredGraph: graph,
