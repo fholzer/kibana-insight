@@ -46,7 +46,10 @@ export default class Graph extends Component {
 
         svg.call(zoom);
         var rect = svg.node().getBoundingClientRect();
-        svg.call(zoom.transform, d3.zoomIdentity.translate(rect.width / 2, rect.height / 2).scale(.5));
+        svg.call(zoom.transform, d3.zoomIdentity.translate(
+            Math.min(rect.width, window.innerWidth) / 2,
+            Math.min(rect.height, window.innerHeight) / 2
+        ).scale(.5));
 
         this.simulation = d3.forceSimulation()
             .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(100))
