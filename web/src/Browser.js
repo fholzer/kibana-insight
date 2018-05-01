@@ -106,9 +106,9 @@ class Browser extends Component {
         const graph = this.state.cluster.graph;
 
         return (
-            <Container fliud>
+            <Container fluid>
                 <Segment textAlign="center" basic>
-                    <Menu compact>
+                    <Menu compact stackable>
                         <Menu.Item>
                             <Checkbox checked={this.state.filterOrphaned} onChange={this.onFilterOrphanedChange} label="Orphaned" />
                         </Menu.Item>

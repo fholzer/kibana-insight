@@ -12,6 +12,10 @@ export default class ObjectGraph {
         ));
     }
 
+    static empty() {
+        return new ObjectGraph(new Graph());
+    }
+
     constructor(graph) {
         this.graph = graph;
     }
@@ -65,6 +69,54 @@ export default class ObjectGraph {
             res.ensureEdge(sourceId, to, edgeValue);
         }
 
+        return new ObjectGraph(res);
+    }
+
+    filterForRelated(nodeId) {
+        var res = new Graph();
+
+        if(!this.graph.hasVertex(nodeId)) {
+            return new ObjectGraph(res);
+        }
+
+        for(let [key, value] of this.graph.verticesWithPathFrom(nodeId)) {
+            res.ensureVertex(key, value);
+        }
+        for(let [key, value] of this.graph.verticesWithPathTo(nodeId)) {
+            res.ensureVertex(key, value);
+        }
+        res.ensureVertex(nodeId, this.graph.vertexValue(nodeId));
+
+        for(let [key, ] of this.graph.verticesWithPathFrom(nodeId)) {
+            for (let [to, , edgeValue] of this.graph.verticesFrom(key)) {
+                res.ensureEdge(key, to, edgeValue);
+            }
+        }
+        for(let [to, , edgeValue] of this.graph.verticesFrom(nodeId)) {
+            res.ensureEdge(nodeId, to, edgeValue);
+        }
+
+        for(let [key, ] of this.graph.verticesWithPathTo(nodeId)) {
+            for (let [from, , edgeValue] of this.graph.verticesTo(key)) {
+                res.ensureEdge(from, key, edgeValue);
+            }
+        }
+        for(let [from, , edgeValue] of this.graph.verticesTo(nodeId)) {
+            res.ensureEdge(from, nodeId, edgeValue);
+        }
+
+        return new ObjectGraph(res);
+    }
+
+    filterForNode(nodeId) {
+        var res = new Graph();
+        res.ensureVertex(nodeId, this.graph.vertexValue(nodeId));
+        return new ObjectGraph(res);
+    }
+
+    merge(graph) {
+        var res = this.graph.clone();
+        res.mergeIn(graph.graph);
         return new ObjectGraph(res);
     }
 
@@ -141,19 +193,25 @@ export default class ObjectGraph {
     }
 
     toD3() {
-        if(this.cachedParts !== null) {
-            return this.cachedParts;
+        if(this.cachedParts === null) {
+            var nodes = [],
+                edges = [];
+
+            for (let [, value] of this.graph.vertices()) {
+                nodes.push(value);
+            }
+            for (let [from, to, ] of this.graph.edges()) {
+                edges.push({ source: from, target: to, weight: 1});
+            }
+            this.cachedParts = {
+                nodes,
+                edges
+            };
         }
 
-        var nodes = [],
-            edges = [];
-
-        for (let [, value] of this.graph.vertices()) {
-            nodes.push(value);
-        }
-        for (let [from, to, ] of this.graph.edges()) {
-            edges.push({ source: from, target: to, weight: 1});
-        }
-        return this.cachedParts = { nodes: nodes, edges: edges };
+        return {
+            nodes: this.cachedParts.nodes.map(n => Object.assign({}, n)),
+            edges: this.cachedParts.edges.map(e => Object.assign({}, e))
+        };
     }
 }

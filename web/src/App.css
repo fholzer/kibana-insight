@@ -53,3 +53,7 @@ body {
 .menu .ui.dropdown {
     margin-left: .5rem;
 }
+div.ui.dropdown img {
+    width: 16px !important;
+    vertical-align: baseline !important;
+}

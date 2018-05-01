@@ -6,6 +6,7 @@ import ClusterSelector from './ClusterSelector';
 import ObjectGraph from './ObjectGraph';
 import GraphStats from './GraphStats';
 import Browser from './Browser';
+import Exporter from './Exporter';
 
 class App extends Component {
     state = {
@@ -58,7 +59,7 @@ class App extends Component {
                 content = <Browser cluster={this.state.cluster} />;
                 break;
             case "exporter":
-                content = <p>Nothing here yet.</p>;
+                content = <Exporter cluster={this.state.cluster} />;
                 break;
             default:
                 content = <p>Ooops</p>;
