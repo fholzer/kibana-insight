@@ -121,4 +121,47 @@ export default class ObjectClient {
             return [nodes, edges];
         });
     }
+
+    exportObjects(ids) {
+        var docs = ids.map(i => ({ _id: i }));
+
+        return q.ninvoke(this.client, "mget", {
+            index: this.cluster.index || '.kibana',
+            type: "doc",
+            body: { docs }
+        }).get(0).then(res => {
+            let missing = res.docs.filter(d => d.found !== true);
+            if(missing.length > 0) {
+                console.log("Error while exporting objects. Some objects couldn't be found:", missing);
+                throw new Error("Some objects couldn't be found!")
+            }
+            return res.docs.map(o => this.exportObjectMapper(o));
+        });
+    }
+
+    exportObjectMapper = obj => {
+        switch(obj._source.type) {
+            case TYPE.DASHBOARD:
+                return this.exportGenericMapper(obj);
+            case TYPE.VISUALIZATION:
+                return this.exportGenericMapper(obj);
+            case TYPE.SEARCH:
+                return this.exportGenericMapper(obj);
+            default:
+                throw new Error("Unknown object type: " + obj._source.type);
+        }
+    }
+
+    exportGenericMapper(obj) {
+        let s = obj._id.split(":");
+        if(s.length !== 2) {
+            throw new Error("Unsupported object _id");
+        }
+
+        return {
+            _id: s[1],
+            _type: s[0],
+            _source: obj._source[obj._source.type]
+        };
+    }
 }

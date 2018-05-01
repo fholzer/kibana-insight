@@ -11,19 +11,20 @@
             {
                 "name": "cluster1",
                 "type": "kibana",
-                "host": "http://cluster1:9200"
-
+                "host": "http://cluster1:9200",
+                "kibana": "http://kibana1:5601"
             },
             {
                 "name": "cluster2",
                 "type": "kibana",
-                "host": "http://cluster2:9200"
-
+                "host": "http://cluster2:9200",
+                "kibana": "http://kibana2:5601"
             },
             {
                 "name": "cluster3",
                 "type": "kibana",
-                "host": "http://cluster3:9200"
+                "host": "http://cluster3:9200",
+                "kibana": "http://kibana3:5601"
             }
         ],
         "searchSize": 1400
