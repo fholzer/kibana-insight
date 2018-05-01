@@ -132,6 +132,10 @@ export default class ObjectGraph {
         return this.cachedStats = stats;
     }
 
+    hasVertex(id) {
+        return this.graph.hasVertex(id);
+    }
+
     hasEdge(from, to) {
         return this.graph.hasEdge(from, to);
     }

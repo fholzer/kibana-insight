@@ -11,12 +11,17 @@ const TYPE_TRANSLATION = {
 
 export default class ObjectList extends Component {
     state = {
-        graph: null
+        graph: null,
+        cluster: null
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if(nextProps.graph !== prevState.graph) {
-            return { graph: nextProps.graph };
+        if(nextProps.graph !== prevState.graph ||
+            nextProps.cluster !== prevState.cluster) {
+            return {
+                graph: nextProps.graph,
+                cluster: nextProps.cluster
+            };
         }
         return null;
     }

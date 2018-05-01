@@ -31,13 +31,13 @@ export default class ClusterSelector extends Component {
 
     render() {
         if(this.state.clusters === true) {
-            return <p>Loading...</p>;
+            return <Dropdown item placeholder="loading..." disabled />;
         }
         if(this.state.clusters === false) {
             return <p>Error while loading data.</p>;
         }
 
         const options = this.state.clusters.map((c, i) => ({ text: c, value: i }));
-        return <Dropdown placeholder='Select Cluster' selection options={options} onChange={this.onClusterSelect} />
+        return <Dropdown item placeholder='Select Cluster'  options={options} onChange={this.onClusterSelect} />
     }
 }

@@ -14,6 +14,7 @@ export default class FilterSelector extends Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
+        var next = null;
         if((nextProps.graph !== prevState.graph ||
             nextProps.type !== prevState.type) &&
             nextProps.graph &&
@@ -24,14 +25,20 @@ export default class FilterSelector extends Component {
                 .map((n) => ({ key: n.id, text: n.title, value: n.id }))
                 .concat(FILTER_NONE);
 
-            return {
+            next = {
                 graph: nextProps.graph,
                 type: nextProps.type,
-                options,
-                filter: "null"
+                options
             };
         }
-        return null;
+        var nextFilter = nextProps.value === null ? "null" : nextProps.value;
+        if(nextFilter !== prevState.filter) {
+            if(next === null) {
+                next = {};
+            }
+            Object.assign(next, { filter: nextFilter });
+        }
+        return next;
     }
 
     static objectTitleComparator(s1, s2) {
@@ -43,6 +50,9 @@ export default class FilterSelector extends Component {
     }
 
     onFilterChange = (e, { value }) => {
+        if(this.state.filter === value) {
+            return;
+        }
         this.setState({ filter: value });
         if(typeof this.props.onFilterChange === 'function') {
             this.props.onFilterChange(this.props.type, value === "null" ? null : value);
