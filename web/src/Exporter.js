@@ -76,14 +76,13 @@ export default class Exporter extends Component {
 
     onDownloadClick = () => {
         var ids = this.state.stagedGraph.toD3().nodes.map(n => n.id);
-        fetch(Config.apiBaseUrl + '/clusters/' + this.state.cluster.clusterId + '/export',
-            {
-                body: JSON.stringify(data),
-                headers: {
-                    'content-type': 'application/json'
-                },
-                method: "POST"
-            })
+        fetch(Config.apiBaseUrl + '/clusters/' + this.state.cluster.clusterId + '/export', {
+            body: JSON.stringify(ids),
+            headers: {
+                'content-type': 'application/json'
+            },
+            method: "POST"
+        });
     }
 
     updateSelectGraph() {
