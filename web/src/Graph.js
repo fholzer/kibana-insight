@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
 import * as d3 from "d3"
+import uuidv1 from 'uuid/v1';
 
 export default class Graph extends Component {
     state = {
+        uuid: uuidv1(),
         graph: null
     }
     focus_node = null;
@@ -40,7 +42,7 @@ export default class Graph extends Component {
 
         // add zoom capabilities
         var zoom = d3.zoom()
-        .on("zoom", zoom_actions);
+        .on("zoom." + this.state.uuid, zoom_actions);
 
         svg.call(zoom);
         var rect = svg.node().getBoundingClientRect();
@@ -59,7 +61,8 @@ export default class Graph extends Component {
 
     componentWillUnmount() {
         this.simulation.stop();
-        this.svg.on(".zoom", null);
+        this.svg.on("." + this.state.uuid, null);
+        d3.select(window).on("." + this.state.uuid, null);
         this.svg.selectAll().remove();
         this.simulation = null;
         this.svg = null;
@@ -99,9 +102,9 @@ export default class Graph extends Component {
         var nodesenter = nodes.enter().append("g")
                 .attr("class", "node")
                 .call(d3.drag()
-                    .on("start", this.dragstarted)
-                    .on("drag", this.dragged)
-                    .on("end", this.dragended));
+                    .on("start." + this.state.uuid, this.dragstarted)
+                    .on("drag." + this.state.uuid, this.dragged)
+                    .on("end." + this.state.uuid, this.dragended));
 
         nodesenter.append("image")
             .attr("xlink:href", (d) => process.env.PUBLIC_URL + "/img/" + d.type + ".svg")
@@ -119,12 +122,12 @@ export default class Graph extends Component {
         nodesenter.append("title")
             .text(function(d) { return d.id; })
 
-        nodesenter.on("mouseover", (d) => {
+        nodesenter.on("mouseover." + this.state.uuid, (d) => {
                 if(this.focus_node === null) {
                     this.set_highlight(d, this.directLinkNodeFilter, this.directLinkLinkFilter);
                 }
             })
-            .on("mouseout", (d) => {
+            .on("mouseout." + this.state.uuid, (d) => {
                 if(this.focus_node === null) {
                     this.exit_highlight();
                 }
@@ -132,7 +135,7 @@ export default class Graph extends Component {
 
         this.nodes = nodes = nodesenter.merge(nodes);
 
-        d3.select(window).on("mouseup", () => {
+        d3.select(window).on("mouseup." + this.state.uuid, () => {
             this.focus_node = null;
             this.exit_highlight();
         });
