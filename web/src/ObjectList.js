@@ -7,7 +7,15 @@ const TYPE_TRANSLATION = {
     "visualization": "Visualizations",
     "search": "Searches",
     "index-pattern": "Index Patterns",
-}
+};
+
+const TYPE_KIBANA_MAP = {
+    "dashboard": "dashboard",
+    "visualization": "visualize/edit",
+    "search": "discover"
+};
+
+const EMPTY_OBJECT = {};
 
 export default class ObjectList extends Component {
     state = {
@@ -32,6 +40,17 @@ export default class ObjectList extends Component {
             return 0;
         }
         return s1.title.localeCompare(s2.title);
+    }
+
+    toLinkProperties(id) {
+        const s = id.split(":", 2);
+        if(TYPE_KIBANA_MAP.hasOwnProperty(s[0])) {
+            return {
+                target: "_blank",
+                href:  this.state.cluster.config.kibana + "/app/kibana#" + TYPE_KIBANA_MAP[s[0]] + "/" + s[1]
+            };
+        }
+        return EMPTY_OBJECT;
     }
 
     render() {
@@ -59,7 +78,7 @@ export default class ObjectList extends Component {
                     <List.Header><Image inline src={process.env.PUBLIC_URL + "/img/" + t.id + ".svg"} /> {t.title}</List.Header>
                     <List.List>{
                         t.children.map((n) => ((
-                            <List.Item key={n.id}>
+                            <List.Item key={n.id} {...this.toLinkProperties(n.id)}>
                                 <List.Header>{n.title}</List.Header>
                                 <List.Description>{n.id}</List.Description>
                             </List.Item>
