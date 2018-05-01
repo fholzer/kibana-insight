@@ -51,6 +51,10 @@ export default class Graph extends Component {
             .force("charge", d3.forceManyBody().strength(-1))
             .force("center", d3.forceCenter())
             .force("collision", d3.forceCollide(16));
+
+        if(this.state.graph !== null) {
+            this.renderGraph();
+        }
     }
 
     componentWillUnmount() {
