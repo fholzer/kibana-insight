@@ -39,7 +39,6 @@ class Browser extends Component {
             };
 
             next.filteredGraph = Browser.generateFilteredGraph(Object.assign({}, prevState, next));
-            console.log("in getDerivedStateFromProps, next state is:", next);
             return next;
         }
         return null;
@@ -65,7 +64,6 @@ class Browser extends Component {
     }
 
     static generateFilteredGraph(state) {
-        console.log('in generateFilteredGraph, state is', state);
         if(state.cluster === null) {
             return;
         }
@@ -101,7 +99,6 @@ class Browser extends Component {
     }
 
     render() {
-        console.log("in render, state is:", this.state);
         if(this.state.cluster === null || this.state.cluster === true) {
             return null;
         }
