@@ -128,6 +128,24 @@ export default class ObjectGraph {
         return new ObjectGraph(this.calculateOrphanedNodes()[1]);
     }
 
+    filterNodes(fn) {
+        var res = new Graph();
+
+        for(let [key, value] of this.graph.vertices()) {
+            if(fn(key, value)) {
+                res.ensureVertex(key, value);
+            }
+        }
+
+        for(let [from, to, e] of this.graph.edges()) {
+            if(res.hasVertex(from) && res.hasVertex(to)) {
+                res.ensureEdge(from, to, e)
+            }
+        }
+
+        return new ObjectGraph(res);
+    }
+
     calculateOrphanedNodes() {
         var res = this.graph.clone(),
             removed = new Graph(),

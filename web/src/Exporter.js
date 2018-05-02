@@ -46,6 +46,10 @@ export default class Exporter extends Component {
         return TYPES_EXPORTABLE.indexOf(o2.type) - TYPES_EXPORTABLE.indexOf(o1.type)
     }
 
+    static exportNodeFilter(key, value) {
+        return TYPES_EXPORTABLE.indexOf(value.type) !== -1;
+    }
+
     onSelectedNodeChange = (e, { value }) => {
         if(value) {
             this.setState({ selectedNode: value });
@@ -67,6 +71,7 @@ export default class Exporter extends Component {
             var additional = prev.selectWithDeps ?
                 prev.cluster.graph.filterForRelated(prev.selectedNode) :
                 prev.cluster.graph.filterForNode(prev.selectedNode);
+            additional = additional.filterNodes(Exporter.exportNodeFilter);
 
             return {
                 stagedGraph: prev.stagedGraph.merge(additional)
@@ -94,6 +99,7 @@ export default class Exporter extends Component {
             var g = prev.selectWithDeps ?
                 prev.cluster.graph.filterForRelated(prev.selectedNode) :
                 prev.cluster.graph.filterForNode(prev.selectedNode);
+            g = g.filterNodes(Exporter.exportNodeFilter);
 
             return {
                 selectedGraph: g
