@@ -12,7 +12,7 @@ export default class ObjectClient {
     constructor(esConfig, cluster) {
         this.config = esConfig;
         this.cluster = cluster;
-        var c = Object.assign({}, esConfig.client, { host: cluster.host })
+        var c = Object.assign({}, esConfig.client, cluster.client, { host: cluster.host })
         this.client = new elasticsearch.Client(c);
         this.cache = null;
     }
