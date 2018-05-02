@@ -3,6 +3,10 @@ import q from 'q';
 import TYPE from './ObjectTypes';
 
 const DEFAULT_MAXAGE = 1000 * 60 * 5;
+const DASHBOARD_ALLOWED_CHILD_TYPES = [
+    TYPE.VISUALIZATION,
+    TYPE.SEARCH
+];
 
 export default class ObjectClient {
     constructor(esConfig, cluster) {
@@ -101,9 +105,9 @@ export default class ObjectClient {
                 var metaSource = d._source.dashboard.panelsJSON
                 if(metaSource) {
                     var meta = JSON.parse(metaSource);
-                    meta.filter((v) => v.type === 'visualization').forEach((v) => {
-                        let vid = TYPE.VISUALIZATION + ':' + v.id;
-                        addEdge(d._id, vid);
+                    meta.filter((v) => DASHBOARD_ALLOWED_CHILD_TYPES.indexOf(v.type) !== -1).forEach((c) => {
+                        let cid = c.type + ':' + c.id;
+                        addEdge(d._id, cid);
                     });
                 }
             });
