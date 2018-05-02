@@ -44,7 +44,7 @@ export default class ObjectList extends Component {
 
     toLinkProperties(id) {
         const s = id.split(":", 2);
-        if(TYPE_KIBANA_MAP.hasOwnProperty(s[0])) {
+        if(TYPE_KIBANA_MAP.hasOwnProperty(s[0]) && this.state.cluster.config.kibana) {
             return {
                 target: "_blank",
                 href:  this.state.cluster.config.kibana + "/app/kibana#" + TYPE_KIBANA_MAP[s[0]] + "/" + s[1]
