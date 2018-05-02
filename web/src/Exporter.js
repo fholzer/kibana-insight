@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Container, Grid, Segment, Divider, Form, Dropdown, Checkbox, Button } from 'semantic-ui-react';
+import fileSaver from 'file-saver';
 import Config from './Config';
 import Graph from './Graph';
 import ObjectGraph from './ObjectGraph';
@@ -87,7 +88,12 @@ export default class Exporter extends Component {
                 'content-type': 'application/json'
             },
             method: "POST"
-        });
+        })
+        .then(res => res.blob())
+        .then(res => {
+            fileSaver.saveAs(res, "export.json", true);
+        })
+        .catch(err => console.log(err));
     }
 
     updateSelectGraph() {
