@@ -53,7 +53,6 @@ app.post('/clusters/:id/export', [clusterIdVerifier, jsonParser], function(req, 
 
     clients[req.params.id].exportObjects(req.body)
     .then(function(objs) {
-        console.log("about to send", objs)
         res.set('Content-disposition', 'attachment; filename=export.json');
         res.set('Content-type', "application/json");
         res.send(objs);
