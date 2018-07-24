@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
 import './App.css';
 import Config from './Config';
 import { Menu, Container, Grid } from 'semantic-ui-react';
@@ -50,44 +51,32 @@ class App extends Component {
     handleMenuClick = (e, { name }) => this.setState({ activeMenu: name })
 
     render() {
-        const activeMenu = this.state.activeMenu;
         const graph = this.state.cluster && this.state.cluster !== true ? this.state.cluster.graph : null;
 
-        var content;
-        switch(activeMenu) {
-            case "browser":
-                content = <Browser cluster={this.state.cluster} />;
-                break;
-            case "exporter":
-                content = <Exporter cluster={this.state.cluster} />;
-                break;
-            default:
-                content = <p>Ooops</p>;
-        }
-
         return (
-            <div>
-            <Menu>
-                <ClusterSelector item onClusterSelect={this.onClusterSelect}/>
-                <Menu.Item
-                    name="browser"
-                    active={"browser" === activeMenu}
-                    onClick={this.handleMenuClick} >Browser</Menu.Item>
-                <Menu.Item
-                    name="exporter"
-                    active={"exporter" === activeMenu}
-                    onClick={this.handleMenuClick} >Exporter</Menu.Item>
-            </Menu>
+            <Router>
+                <div>
+                    <Menu>
+                        <ClusterSelector item onClusterSelect={this.onClusterSelect}/>
+                        <Menu.Item as={NavLink} to="/browser">Browser</Menu.Item>
+                        <Menu.Item as={NavLink} to="/exporter">Exporter</Menu.Item>
+                    </Menu>
 
-            <Container style={{ marginTop: '3em' }}>
-                <Grid centered>
-                    <GraphStats graph={graph} size="tiny"/>
-                </Grid>
-                {content}
-            </Container>
-            </div>
+                    <Container style={{ marginTop: '3em' }}>
+                        <Grid centered>
+                            <GraphStats graph={graph} size="tiny"/>
+                        </Grid>
+                        <Route path="/browser" component={this.renderBrowser}/>
+                        <Route path="/exporter" component={this.renderExporter}/>
+                    </Container>
+                </div>
+            </Router>
         );
     }
+
+    renderBrowser = () => <Browser cluster={this.state.cluster} />
+
+    renderExporter = () => <Exporter cluster={this.state.cluster} />
 }
 
 export default App;
