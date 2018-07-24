@@ -1,8 +1,16 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { Route } from "react-router-dom";
+import { Menu, Container, Segment, Header, Grid, Icon } from 'semantic-ui-react';
 import Config from './Config';
-import { Dropdown } from 'semantic-ui-react';
+import ClusterSelectionDropdown from './ClusterSelectionDropdown';
 
 export default class ClusterSelector extends Component {
+    static propTypes = {
+        history: PropTypes.shape({
+            push: PropTypes.func.isRequired
+        }).isRequired
+    }
     state = {
         clusters: true
     }
@@ -23,21 +31,30 @@ export default class ClusterSelector extends Component {
         });
     }
 
-    onClusterSelect = (e, { value }) => {
-        if(typeof this.props.onClusterSelect === 'function') {
-            this.props.onClusterSelect(value, this.state.clusters[value]);
+    onClick = c => {
+        this.props.history.push("/" + c);
+    }
+
+    renderSegment(child, header) {
+        if(header) {
+            header = <Header as="h1" attached="top">{header}</Header>
         }
+        const bottomProps = header ? { attached: "bottom" } : {};
+        return (
+            <Container className="clusterselector">
+                {header}
+                <Segment {...bottomProps}>{child}</Segment>
+            </Container>
+        )
     }
 
     render() {
-        if(this.state.clusters === true) {
-            return <Dropdown item placeholder="loading..." disabled />;
-        }
-        if(this.state.clusters === false) {
-            return <p>Error while loading data.</p>;
-        }
-
-        const options = this.state.clusters.map((c, i) => ({ text: c, value: i }));
-        return <Dropdown item placeholder='Select Cluster'  options={options} onChange={this.onClusterSelect} />
+        return (
+            <div>
+                <Menu>
+                    <Route path="/:cluster?/:app?" item component={ClusterSelectionDropdown}/>
+                </Menu>
+            </div>
+        );
     }
 }

@@ -58,6 +58,18 @@ div.ui.dropdown img {
     vertical-align: baseline !important;
 }
 
+.clusterselector {
+    margin-top: 100px;
+}
+
+.clusterlist p {
+    font-size: 1.5rem;
+}
+
+.clusterlist > div {
+    display: inline-block;
+}
+
 .graphsizewarning > p {
     text-align: center;
     padding-top: 100px;
