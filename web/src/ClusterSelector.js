@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Route } from "react-router-dom";
-import { Menu, Container, Segment, Header, Grid, Icon } from 'semantic-ui-react';
+import { Menu, Container, Segment, Header } from 'semantic-ui-react';
 import Config from './Config';
 import ClusterSelectionDropdown from './ClusterSelectionDropdown';
 

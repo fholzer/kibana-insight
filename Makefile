@@ -3,7 +3,7 @@ API_FILES_STATIC=api/config.json api/package.json api/package-lock.json
 API_FILES_DIRS=api/lib/ api/node_modules/
 API_FILES=$(API_FILES_STATIC) $(shell find $(API_FILES_DIRS) -type f)
 
-WEB_FILES=$(shell find web/package.json web/package-lock.json web/src web/public -type f)
+WEB_FILES=$(shell find web/yarn.lock web/package.json web/src web/public -type f)
 
 .PHONY: package
 package: package-api package-web
