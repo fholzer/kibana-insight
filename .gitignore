@@ -2,13 +2,13 @@
 node_modules/
 
 # build
-lib/
+/api/lib
 
 # testing
 /coverage
 
 # production
-/build
+/web/build
 
 # config
 config.json
@@ -23,3 +23,6 @@ config.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# dist
+/*.tar.gz
