@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
+import { BrowserRouter as Router, Route, Redirect, NavLink } from "react-router-dom";
 import './App.css';
 import Config from './Config';
 import { Menu, Container, Grid } from 'semantic-ui-react';
@@ -66,6 +66,7 @@ class App extends Component {
                         <Grid centered>
                             <GraphStats graph={graph} size="tiny"/>
                         </Grid>
+                        <Redirect path="/" exact to="/browser" />
                         <Route path="/browser" component={this.renderBrowser}/>
                         <Route path="/exporter" component={this.renderExporter}/>
                     </Container>
