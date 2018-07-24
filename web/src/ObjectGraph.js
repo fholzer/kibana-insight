@@ -210,6 +210,10 @@ export default class ObjectGraph {
         return this.graph.hasEdge(from, to);
     }
 
+    nodeCount() {
+        return this.graph.vertexCount();
+    }
+
     toD3() {
         if(this.cachedParts === null) {
             var nodes = [],

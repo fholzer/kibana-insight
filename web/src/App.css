@@ -57,3 +57,8 @@ div.ui.dropdown img {
     width: 16px !important;
     vertical-align: baseline !important;
 }
+
+.graphsizewarning > p {
+    text-align: center;
+    padding-top: 100px;
+}

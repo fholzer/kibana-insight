@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Menu, Container, Grid, Segment, Divider, Checkbox } from 'semantic-ui-react';
-import Graph from './Graph';
+import SafeGraph from './SafeGraph';
 import FilterSelector from './FilterSelector';
 import ObjectList from './ObjectList';
 import GraphStats from './GraphStats';
@@ -123,7 +123,7 @@ class Browser extends Component {
                 <Segment>
                     <Grid columns="equal">
                         <Grid.Column width={10}>
-                            <Graph graph={this.state.filteredGraph}/>
+                            <SafeGraph graph={this.state.filteredGraph}/>
                         </Grid.Column>
                         <Grid.Column width={6}>
                             <Segment>
