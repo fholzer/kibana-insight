@@ -56,26 +56,6 @@ export default class Exporter extends Component {
         selectWithDeps: true
     }
 
-/*
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if(nextProps.cluster !== prevState.cluster) {
-            const exportable = nextProps.cluster.parts.nodes
-                .filter(n => TYPES_EXPORTABLE.indexOf(n.type) !== -1)
-                .sort(Exporter.objectTypeTitleComparator)
-                .map((n) => ({ key: n.id, text: n.title, value: n.id, image: process.env.PUBLIC_URL + "/img/" + n.type + ".svg" }));
-
-            return {
-                cluster: nextProps.cluster,
-                exportable,
-                filterEntity: null,
-                selectedGraph: null,
-                stagedGraph: ObjectGraph.empty()
-            };
-        }
-        return null;
-    }
-*/
-
     componentDidMount() {
         this.updateClusterState();
         this.updateFilterState();
@@ -111,7 +91,6 @@ export default class Exporter extends Component {
             exportable
         };
         //next.filteredGraph = Browser.generateFilteredGraph(Object.assign({}, this.state, next));
-        console.log("updateClusterState: setState");
         this.setState(next);
     }
 
@@ -139,7 +118,6 @@ export default class Exporter extends Component {
             return
         }
 
-        console.log("updateFilterState: setState");
         this.setState({
             filterType,
             filterEntity
@@ -164,22 +142,12 @@ export default class Exporter extends Component {
         return TYPES_EXPORTABLE.indexOf(value.type) !== -1;
     }
 
-/*
-    onSelectedNodeChange = (e, { value }) => {
-        if(value) {
-            this.setState({ filterEntity: value });
-            this.updateSelectGraph();
-        }
-    }
-*/
     onWithDepsChanged = (e, { checked }) => {
-        console.log("onWithDepsChanged: setState");
         this.setState({ selectWithDeps: checked });
         this.updateSelectGraph();
     }
 
     onAddSelectionClick = () => {
-        console.log("onAddSelectionClick: setState");
         this.setState(prev => {
             if(!prev.filterEntity) {
                 return null;
@@ -213,7 +181,6 @@ export default class Exporter extends Component {
     }
 
     updateSelectGraph() {
-        console.log("updateSelectGraph: setState");
         this.setState(prev => {
             if(!prev.filterEntity || !prev.cluster.graph) {
                 return null;
@@ -256,7 +223,6 @@ export default class Exporter extends Component {
             return;
         }
 
-        console.log("updateFilteredGraph: setState");
         this.setState(prev => ({
             filteredGraph: Exporter.generateFilteredGraph(prev)
         }));
@@ -310,8 +276,6 @@ export default class Exporter extends Component {
         const filterTypeOptions = FILTER_TYPE_LIST.map(e => ({ key: e.id, text: e.title, value: e.id }));
         const filterEntityProps = this.getFilterEntityProps();
         const filterEntityOptions = this.getFilterEntityOptions();
-
-        const options = this.state.exportable;
 
         return (
             <Container fluid>
