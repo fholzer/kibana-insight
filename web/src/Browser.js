@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Menu, Container, Grid, Segment, Divider, Dropdown } from 'semantic-ui-react';
 import SafeGraph from './SafeGraph';
 import ObjectList from './ObjectList';
@@ -44,11 +43,6 @@ const FILTER_TYPE_LIST = [
 ];
 
 export default class Browser extends Component {
-    static propTypes = {
-        history: PropTypes.shape({
-            push: PropTypes.func.isRequired
-        }).isRequired
-    }
     state = {
         cluster: null,
         filterType: "none"
@@ -147,9 +141,9 @@ export default class Browser extends Component {
                 return graph.filterForSink("missing");
             case "orphaned":
                 return graph.filterForOrphanedNodes();
+            default:
+                return graph.filterForRelated(filterEntity);
         }
-
-        return graph.filterForRelated(filterEntity);
     }
 
     updateFilteredGraph() {
