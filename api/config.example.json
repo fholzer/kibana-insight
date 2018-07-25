@@ -23,8 +23,11 @@
             {
                 "name": "cluster3",
                 "type": "kibana",
-                "host": "http://cluster3:9200",
-                "kibana": "http://kibana3:5601"
+                "host": "https://cluster3",
+                "kibana": "https://kibana3",
+                "client": {
+                    "httpAuth": "username:password"
+                }
             }
         ],
         "searchSize": 1400
