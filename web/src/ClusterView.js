@@ -74,7 +74,7 @@ export default class ClusterView extends Component {
                     </Grid>
 
                     <Route path="/:cluster/browser/:filter?" component={this.renderBrowser}/>
-                    <Route path="/:cluster/exporter" component={this.renderExporter}/>
+                    <Route path="/:cluster/exporter/:filter?" component={this.renderExporter}/>
                 </Container>
             </div>
         );
