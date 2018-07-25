@@ -1,7 +1,8 @@
 
-API_FILES_STATIC=api/config.json api/package.json api/package-lock.json
-API_FILES_DIRS=api/lib/
-API_FILES=$(API_FILES_STATIC) $(shell find $(API_FILES_DIRS) -type f)
+API_FILES_SRC=api/config.json api/package.json api/package-lock.json api/lib/
+API_FILES_SCAN=$(shell find $(API_FILES_SRC) -type f)
+API_FILES_DEPS=api/node_modules
+API_FILES_PKG=$(API_FILES_SRC) $(API_FILES_DEPS)
 
 WEB_FILES=$(shell find web/yarn.lock web/package.json web/src web/public -type f)
 
@@ -11,8 +12,8 @@ package: package-api package-web
 .PHONY: package-api
 package-api: api.tar.gz
 
-api.tar.gz: $(API_FILES)
-	tar czf $@ $(API_FILES_STATIC) $(API_FILES_DIRS)
+api.tar.gz: $(API_FILES_SCAN)
+	tar czf $@ $(API_FILES_PKG)
 
 .PHONY: package-web
 package-web: web.tar.gz
