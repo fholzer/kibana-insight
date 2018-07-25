@@ -36,7 +36,7 @@ export default class SafeGraph extends Component {
         const height = this.props.height ? this.props.height : "100%";
         return (
             <div className="graphsizewarning" ref={node => this.rootnode = node} width="100%" height={height}>
-            <p>Whoa, this graph is big! It has {count} nodes. <a onClick={this.onAcknowledge}>Click here</a> if you still want to load it.</p>
+            <p>Whoa, this graph is big! It has {count} nodes. <a className="link" onClick={this.onAcknowledge}>Click here</a> if you still want to load it.</p>
             </div>
         )
     }

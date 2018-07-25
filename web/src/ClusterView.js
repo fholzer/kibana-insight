@@ -73,12 +73,12 @@ export default class ClusterView extends Component {
                         <GraphStats graph={graph} size="tiny"/>
                     </Grid>
 
-                    <Route path="/:cluster/browser" component={this.renderBrowser}/>
+                    <Route path="/:cluster/browser/:filter?" component={this.renderBrowser}/>
                     <Route path="/:cluster/exporter" component={this.renderExporter}/>
                 </Container>
             </div>
         );
     }
-    renderBrowser = () => <Browser cluster={this.state.cluster} />
-    renderExporter = () => <Exporter cluster={this.state.cluster} />
+    renderBrowser = (props) => <Browser {...props} cluster={this.state.cluster} />
+    renderExporter = (props) => <Exporter {...props} cluster={this.state.cluster} />
 }
