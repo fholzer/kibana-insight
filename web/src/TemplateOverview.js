@@ -37,6 +37,17 @@ export default class TemplateOverview extends Component {
         templates = templates.sort();
         const rows = [];
         for(let t of templates) {
+            let check = data.clusters.map(c => c.templates[t]).filter(t => t !== undefined);
+            let highlight = 0;
+            if(check.length > 1) {
+                highlight = 1;
+                for(let i = 1; i < check.length; i++) {
+                    if(check[i] !== check[0]) {
+                        highlight = 2;
+                        break;
+                    }
+                }
+            }
             let cols = data.clusters.map(c => {
                 let val = "";
                 if(c.templates.hasOwnProperty(t)) {
@@ -45,7 +56,7 @@ export default class TemplateOverview extends Component {
                 return (<Table.Cell key={c.name}>{val}</Table.Cell>);
             });
             cols.unshift((<Table.Cell key={-1}>{t}</Table.Cell>));
-            rows.push((<Table.Row key={t}>{cols}</Table.Row>));
+            rows.push((<Table.Row key={t} positive={highlight === 1} negative={highlight === 2}>{cols}</Table.Row>));
         }
 
         return (
