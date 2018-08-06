@@ -5,7 +5,7 @@ module.exports = function(clients) {
     var data;
 
     const templateMapper = function(obj) {
-        if(!obj.mappings) return "0000";
+        if(!obj.mappings) return "0".repeat(64);
         var ser = JSON.stringify(obj.mappings);
         var shasum = crypto.createHash('sha256');
         shasum.update(ser);
@@ -37,18 +37,6 @@ module.exports = function(clients) {
                 allTemplates,
                 clusters
             };
-
-            console.log("template," + clusters.map(c => c.name).join(","));
-            for(let t of allTemplates) {
-                var line = [t].concat(clusters.map(c => c.templates.hasOwnProperty(t) ? "Y" : "N"));
-                console.log(line.join(","));
-            }
-            console.log();
-            console.log("template," + clusters.map(c => c.name).join(","));
-            for(let t of allTemplates) {
-                var line = [t].concat(clusters.map(c => c.templates.hasOwnProperty(t) ? hashMapping(c.templates[t]) : ""));
-                console.log(line.join(","));
-            }
         });
     };
 
@@ -60,4 +48,4 @@ module.exports = function(clients) {
     setInterval(updateData, 60 * 60 * 1000);
 
     return () => data;
-}
+};
