@@ -17,6 +17,10 @@ export default class ObjectClient {
         this.cache = null;
     }
 
+    getName() {
+        return this.cluster.name;
+    }
+
     getKibanaObjects(type) {
         return q.ninvoke(this.client, "search", {
             index: this.cluster.index || '.kibana',
@@ -47,29 +51,41 @@ export default class ObjectClient {
                     return res;
                 }
 
-                return this.cache = this.fetch().spread((nodes, edges) => ({
-                    ts: now,
-                    nodes,
-                    edges
-                }));
+                return this.rebuildCache();
             });
         }
 
-        return this.cache = this.fetch().spread((nodes, edges) => ({
-            ts: now,
-            nodes,
-            edges
+        return this.rebuildCache();
+    }
+
+    rebuildCache() {
+        return this.cache = this.fetch().then((res) => ({
+            ts: Date.now(),
+            templates: res.templates,
+            nodes: res.nodes,
+            edges: res.edges
         }));
+    }
+
+    fetchTemplates() {
+        return q.ninvoke(this.client.indices, "getTemplate", { name: "*" })
+        .get(0).then((res) => {
+            return {
+                templates: res,
+                templateList: Object.getOwnPropertyNames(res)
+            };
+        });
     }
 
     fetch() {
         console.log("Fetching data");
         return q.all([
+            this.fetchTemplates(),
             this.getKibanaObjects(TYPE.INDEX_PATTERN),
             this.getKibanaObjects(TYPE.SEARCH),
             this.getKibanaObjects(TYPE.VISUALIZATION),
             this.getKibanaObjects(TYPE.DASHBOARD)])
-        .spread((indexPatterns, searches, visualizations, dashboards) => {
+        .spread((templates, indexPatterns, searches, visualizations, dashboards) => {
             var nodes = [].concat(
                 this.kibanaObjectMapper(TYPE.INDEX_PATTERN, indexPatterns),
                 this.kibanaObjectMapper(TYPE.SEARCH, searches),
@@ -122,7 +138,11 @@ export default class ObjectClient {
             }
 
             console.log("Got " + nodes.length + " nodes, " + edges.length + " edges");
-            return [nodes, edges];
+            return {
+                templates,
+                nodes,
+                edges
+            };
         });
     }
 

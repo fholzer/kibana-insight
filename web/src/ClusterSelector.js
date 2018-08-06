@@ -6,11 +6,6 @@ import Config from './Config';
 import ClusterSelectionDropdown from './ClusterSelectionDropdown';
 
 export default class ClusterSelector extends Component {
-    static propTypes = {
-        history: PropTypes.shape({
-            push: PropTypes.func.isRequired
-        }).isRequired
-    }
     state = {
         clusters: true
     }

@@ -1,10 +1,11 @@
 "use strict";
-import 'source-map-support/register'
-import nconf from 'nconf'
-import express from 'express'
-import cors from 'cors'
+import 'source-map-support/register';
+import nconf from 'nconf';
+import express from 'express';
+import cors from 'cors';
 import bodyParser from 'body-parser';
-import ObjectClient from './ObjectClient'
+import ObjectClient from './ObjectClient';
+import TemplateCheck from './templateCheck';
 
 const config = nconf.argv()
    .env()
@@ -12,6 +13,7 @@ const config = nconf.argv()
    .get();
 
 const clients = config.elasticsearch.clusters.map((c) => new ObjectClient(config.elasticsearch, c));
+const templateCheck = TemplateCheck(clients);
 
 const clusterByName = function(req, res, next) {
     const idx = config.elasticsearch.clusters.findIndex(e => e.name === req.params.id);
@@ -29,7 +31,7 @@ const clusterByName = function(req, res, next) {
 const jsonParser = bodyParser.json();
 const app = express();
 
-app.use(cors(config.cors));
+//app.use(cors(config.cors));
 app.get('/clusters', (req, res) => res.json(config.elasticsearch.clusters.map((h) => h.name)));
 
 app.get('/clusters/:id', clusterByName, function(req, res) {
@@ -74,4 +76,14 @@ app.post('/clusters/:id/export', [clusterByName, jsonParser], function(req, res)
     });
 });
 
-app.listen(3001, () => console.log('Example app listening on port 3001!'));
+app.get('/templates', function(req, res) {
+    templateCheck()
+    .then(function(objs) {
+        res.json(objs);
+    })
+    .fail(function(err) {
+        console.log(err);
+        res.sendStatus(500);
+    });
+});
+app.listen(8101, () => console.log('Example app listening on port 8101!'));
