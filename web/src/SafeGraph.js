@@ -35,13 +35,15 @@ export default class SafeGraph extends Component {
     renderWarning(count) {
         const height = this.props.height ? this.props.height : "100%";
         return (
-            <div className="graphsizewarning" ref={node => this.rootnode = node} width="100%" height={height}>
+            <div className="graphsizewarning" ref={node => this.rootnode = node} width="100%" style={{ height }}>
             <p>Whoa, this graph is big! It has {count} nodes. <a className="link" onClick={this.onAcknowledge}>Click here</a> if you still want to load it.</p>
             </div>
         )
     }
 
     renderGraph() {
-        return <Graph graph={this.state.graph}/>;
+        const props = Object.assign({}, this.props);
+        delete props.graph;
+        return <Graph graph={this.state.graph} height={this.props.height}/>;
     }
 }

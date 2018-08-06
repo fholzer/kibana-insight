@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Container, Grid, Segment, Divider, Form, Dropdown, Checkbox, Button } from 'semantic-ui-react';
 import fileSaver from 'file-saver';
 import Config from './Config';
-import Graph from './Graph';
+import SafeGraph from './SafeGraph';
 import ObjectGraph from './ObjectGraph';
 import ObjectList from './ObjectList';
 import GraphStats from './GraphStats';
@@ -283,7 +283,7 @@ export default class Exporter extends Component {
                     <Grid columns="equal">
                         <Grid.Column width={8}>
                             <Segment>
-                                <Graph graph={this.state.selectedGraph} style={{border: "1px solid black"}} height="300px"/>
+                                <SafeGraph graph={this.state.selectedGraph} height="300px"/>
                             </Segment>
                             <Form>
                                 <Form.Field>
@@ -325,7 +325,7 @@ export default class Exporter extends Component {
                         <Grid.Column width={8}>
                             <Segment textAlign="center" basic><GraphStats graph={this.state.stagedGraph} size="mini" /></Segment>
                             <Divider/>
-                            <Graph graph={this.state.stagedGraph} style={{border: "1px solid black"}} height="400px" />
+                            <SafeGraph graph={this.state.stagedGraph} height="400px" />
                             <Divider/>
                             <Button
                                 floated="right"
