@@ -173,7 +173,6 @@ module.exports = class ObjectClient {
 
         return q.ninvoke(this.client, "mget", {
             index: this.cluster.index || '.kibana',
-            type: "doc",
             body: { docs }
         }).get(0).then(res => {
             let missing = res.docs.filter(d => d.found !== true);
