@@ -79,7 +79,7 @@ module.exports = class ObjectClient {
     }
 
     fetch() {
-        log.info("Fetching data");
+        log.info(`Fetching data for "${this.cluster.name}"`);
         return q.all([
             this.fetchTemplates(),
             this.getKibanaObjects(TYPE.INDEX_PATTERN),
@@ -99,8 +99,15 @@ module.exports = class ObjectClient {
             };
 
             searches.hits.hits.forEach((s) => {
-                var ip = TYPE.INDEX_PATTERN + ':' + JSON.parse(s._source.search.kibanaSavedObjectMeta.searchSourceJSON).index;
-                addEdge(s._id, ip);
+                var ip = [];
+                if(!s._source.references) {
+                    ip.push(TYPE.INDEX_PATTERN + ':' + JSON.parse(s._source.search.kibanaSavedObjectMeta.searchSourceJSON).index);
+                } else {
+                    for(let ref of s._source.references) {
+                        ip.push(`${ref.type}:${ref.id}`);
+                    }
+                }
+                ip.forEach(e => addEdge(s._id, e));
             });
 
             visualizations.hits.hits.forEach((v) => {
@@ -108,21 +115,35 @@ module.exports = class ObjectClient {
                     let sid = TYPE.SEARCH + ':' + v._source.visualization.savedSearchId;
                     addEdge(v._id, sid);
                 }
-                var metaSource = v._source.visualization.kibanaSavedObjectMeta.searchSourceJSON;
-                if(metaSource) {
-                    let meta = JSON.parse(metaSource);
-                    if(meta.index) {
-                        let ip = TYPE.INDEX_PATTERN + ':' + meta.index;
-                        addEdge(v._id, ip);
+
+                if(!v._source.references) {
+                    var metaSource = v._source.visualization.kibanaSavedObjectMeta.searchSourceJSON;
+                    if(metaSource) {
+                        let meta = JSON.parse(metaSource);
+                        if(meta.index) {
+                            let ip = TYPE.INDEX_PATTERN + ':' + meta.index;
+                            addEdge(v._id, ip);
+                        }
                     }
+                } else {
+                    v._source.references.forEach(e => {
+                        addEdge(v._id, `${e.type}:${e.id}`);
+                    })
                 }
             });
 
             dashboards.hits.hits.forEach((d) => {
-                var metaSource = d._source.dashboard.panelsJSON
-                if(metaSource) {
-                    var meta = JSON.parse(metaSource);
-                    meta.filter((v) => DASHBOARD_ALLOWED_CHILD_TYPES.indexOf(v.type) !== -1).forEach((c) => {
+                let refs;
+                if(d._source.references) {
+                    refs = d._source.references;
+                } else {
+                    if(d._source.dashboard.panelsJSON) {
+                        refs = JSON.parse(d._source.dashboard.panelsJSON);
+                    }
+                }
+
+                if(refs) {
+                    refs.filter((v) => DASHBOARD_ALLOWED_CHILD_TYPES.indexOf(v.type) !== -1).forEach((c) => {
                         let cid = c.type + ':' + c.id;
                         addEdge(d._id, cid);
                     });
