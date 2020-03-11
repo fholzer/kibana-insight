@@ -1,5 +1,6 @@
 const qmap = require('./qmap'),
-    crypto = require('crypto');
+    crypto = require('crypto'),
+    log = require('log4js').getLogger("templateCheck");
 
 module.exports = function(clients) {
     var data;
@@ -25,13 +26,17 @@ module.exports = function(clients) {
                     templates: hashes,
                     templateList: t.templateList
                 };
+            })
+            .catch(e => {
+                log.error(`Failed to fetch or process templates for cluster "${client.cluster.name}"`, e);
+                return null;
             });
     };
 
     const loadData = function() {
         return qmap(2, clients, clusterMapper)
         .then(function(clusters) {
-            var allTemplates = [].concat.apply([], clusters.map(c => c.templateList));
+            var allTemplates = [].concat.apply([], clusters.filter(c => c !== null).map(c => c.templateList));
             allTemplates = allTemplates.sort().filter((el, i, a) => i === a.indexOf(el) && el.length > 0);
             return {
                 allTemplates,

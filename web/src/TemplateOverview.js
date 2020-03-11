@@ -3,6 +3,14 @@ import { Route } from "react-router-dom";
 import { Container, Segment, Table } from 'semantic-ui-react';
 import Config from './Config';
 
+const MANAGED_PREFIXES = [
+    "logstash-",
+    "filebeat-",
+    "metricbeat-",
+    "heartbeat-",
+    "packetbeat-"
+];
+
 export default class TemplateOverview extends Component {
     state = {
         templates: true
@@ -24,8 +32,9 @@ export default class TemplateOverview extends Component {
         });
     }
 
-    renderTemplateTable(data, sys, beat) {
-        const clusterNames = data.clusters.map(c => c.name);
+    renderTemplateTable(data, sys, ignoreManaged, ignoreAbsence) {
+        const clusters = data.clusters.filter(e => e !== null);
+        const clusterNames = clusters.map(c => c.name);
         const clusterHeaders = clusterNames.map(c => (<Table.HeaderCell key={c} content={c}/>));
         clusterHeaders.unshift((<Table.HeaderCell key="-1"/>));
 
@@ -33,11 +42,21 @@ export default class TemplateOverview extends Component {
         if(sys !== true) {
             templates = templates.filter(t => t.substring(0, 1) !== ".")
         }
+        if(ignoreManaged === true) {
+            templates = templates.filter(t => {
+                for(let p of MANAGED_PREFIXES) {
+                    if(templates.startsWith(p)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+        }
 
         templates = templates.sort();
         const rows = [];
         for(let t of templates) {
-            let check = data.clusters.map(c => c.templates[t]).filter(t => t !== undefined);
+            let check = clusters.map(c => c.templates[t]).filter(t => t !== undefined);
             let highlight = 0;
             if(check.length > 1) {
                 highlight = 1;
@@ -48,7 +67,7 @@ export default class TemplateOverview extends Component {
                     }
                 }
             }
-            let cols = data.clusters.map(c => {
+            let cols = clusters.map(c => {
                 let val = "";
                 if(c.templates.hasOwnProperty(t)) {
                     val = c.templates[t].substring(0, 4);

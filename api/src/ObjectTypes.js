@@ -1,4 +1,4 @@
-export default Object.freeze({
+module.exports = Object.freeze({
     CONFIG: 'config',
     INDEX_PATTERN: 'index-pattern',
     SEARCH: 'search',

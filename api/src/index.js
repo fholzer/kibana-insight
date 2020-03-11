@@ -1,11 +1,14 @@
 "use strict";
-import 'source-map-support/register';
-import nconf from 'nconf';
-import express from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import ObjectClient from './ObjectClient';
-import TemplateCheck from './templateCheck';
+const nconf = require('nconf'),
+    express = require('express'),
+    cors = require('cors'),
+    bodyParser = require('body-parser'),
+    ObjectClient = require('./ObjectClient'),
+    TemplateCheck = require('./templateCheck'),
+    log4js = require('log4js');
+
+log4js.getLogger().level = 'debug';
+const log = log4js.getLogger("index");
 
 const config = nconf.argv()
    .env()
@@ -31,6 +34,11 @@ const clusterByName = function(req, res, next) {
 const jsonParser = bodyParser.json();
 const app = express();
 
+const errorHandler = function(err) {
+    log.error(`Failed to load data for cluster "${cluster.cluster.name}"`, err);
+    res.sendStatus(500);
+};
+
 //app.use(cors(config.cors));
 app.get('/clusters', (req, res) => res.json(config.elasticsearch.clusters.map((h) => h.name)));
 
@@ -45,18 +53,12 @@ app.get('/clusters/:id', clusterByName, function(req, res) {
             parts: r,
         });
     })
-    .fail(function(err) {
-        console.log(err);
-        res.sendStatus(500);
-    });
+    .fail(errorHandler);
 });
 
 app.get('/clusters/:id/parts', clusterByName, function(req, res) {
     req.cluster.get().then((r) => res.json(r))
-    .fail(function(err) {
-        console.log(err);
-        res.sendStatus(500);
-    });
+    .fail(errorHandler);
 });
 
 app.post('/clusters/:id/export', [clusterByName, jsonParser], function(req, res) {
@@ -70,10 +72,7 @@ app.post('/clusters/:id/export', [clusterByName, jsonParser], function(req, res)
         res.set('Content-type', "application/json");
         res.send(objs);
     })
-    .fail(function(err) {
-        console.log(err);
-        res.sendStatus(500);
-    });
+    .fail(errorHandler);
 });
 
 app.get('/templates', function(req, res) {
@@ -81,9 +80,6 @@ app.get('/templates', function(req, res) {
     .then(function(objs) {
         res.json(objs);
     })
-    .fail(function(err) {
-        console.log(err);
-        res.sendStatus(500);
-    });
+    .fail(errorHandler);
 });
-app.listen(8101, () => console.log('Example app listening on port 8101!'));
+app.listen(8101, () => log.info('Example app listening on port 8101!'));

@@ -1,6 +1,7 @@
-import elasticsearch from 'elasticsearch';
-import q from 'q';
-import TYPE from './ObjectTypes';
+const elasticsearch = require('elasticsearch');
+    q = require('q'),
+    TYPE = require('./ObjectTypes'),
+    log = require('log4js').getLogger('ObjectClient');
 
 const DEFAULT_MAXAGE = 1000 * 60 * 5;
 const DASHBOARD_ALLOWED_CHILD_TYPES = [
@@ -8,7 +9,7 @@ const DASHBOARD_ALLOWED_CHILD_TYPES = [
     TYPE.SEARCH
 ];
 
-export default class ObjectClient {
+module.exports = class ObjectClient {
     constructor(esConfig, cluster) {
         this.config = esConfig;
         this.cluster = cluster;
@@ -27,7 +28,7 @@ export default class ObjectClient {
             q: 'type:' + type,
             size: this.config.searchSize
         }).get(0).then(function(res) {
-            console.log("got " + res.hits.hits.length + " objects of type " + type);
+            log.debug("got " + res.hits.hits.length + " objects of type " + type);
             return res;
         });
     }
@@ -78,7 +79,7 @@ export default class ObjectClient {
     }
 
     fetch() {
-        console.log("Fetching data");
+        log.info("Fetching data");
         return q.all([
             this.fetchTemplates(),
             this.getKibanaObjects(TYPE.INDEX_PATTERN),
@@ -137,7 +138,7 @@ export default class ObjectClient {
                 });
             }
 
-            console.log("Got " + nodes.length + " nodes, " + edges.length + " edges");
+            log.debug("Got " + nodes.length + " nodes, " + edges.length + " edges");
             return {
                 templates,
                 nodes,
@@ -156,7 +157,7 @@ export default class ObjectClient {
         }).get(0).then(res => {
             let missing = res.docs.filter(d => d.found !== true);
             if(missing.length > 0) {
-                console.log("Error while exporting objects. Some objects couldn't be found:", missing);
+                log.error("Error while exporting objects. Some objects couldn't be found:", missing);
                 throw new Error("Some objects couldn't be found!")
             }
             return res.docs.map(o => this.exportObjectMapper(o));
