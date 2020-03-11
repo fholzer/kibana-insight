@@ -1,5 +1,4 @@
-const qmap = require('./qmap'),
-    crypto = require('crypto'),
+const crypto = require('crypto'),
     log = require('log4js').getLogger("templateCheck");
 
 module.exports = function(clients) {
@@ -33,22 +32,24 @@ module.exports = function(clients) {
             });
     };
 
-    const loadData = function() {
-        return qmap(2, clients, clusterMapper)
-        .then(function(clusters) {
-            var allTemplates = [].concat.apply([], clusters.filter(c => c !== null).map(c => c.templateList));
-            allTemplates = allTemplates.sort().filter((el, i, a) => i === a.indexOf(el) && el.length > 0);
-            return {
-                allTemplates,
-                clusters
-            };
-        });
+    const loadData = async function() {
+        let clusters = [];
+        for(let client of clients) {
+            clusters.push(await clusterMapper(client));
+        }
+
+        var allTemplates = [].concat.apply([], clusters.filter(c => c !== null).map(c => c.templateList));
+        allTemplates = allTemplates.sort().filter((el, i, a) => i === a.indexOf(el) && el.length > 0);
+        return {
+            allTemplates,
+            clusters
+        };
     };
 
     const updateData = function() {
-        data = loadData();
+        data = q(loadData());
     };
-    data = loadData();
+    data = q(loadData());
     data.done();
     setInterval(updateData, 60 * 60 * 1000);
 
