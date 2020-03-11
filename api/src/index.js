@@ -34,8 +34,8 @@ const clusterByName = function(req, res, next) {
 const jsonParser = bodyParser.json();
 const app = express();
 
-const errorHandler = function(err) {
-    log.error(`Failed to load data for cluster "${cluster.cluster.name}"`, err);
+const errorHandler = function(req, res, err) {
+    log.error(`Failed to load data for cluster "${req.cluster.cluster.name}"`, err);
     res.sendStatus(500);
 };
 
@@ -53,12 +53,12 @@ app.get('/clusters/:id', clusterByName, function(req, res) {
             parts: r,
         });
     })
-    .fail(errorHandler);
+    .fail(errorHandler.bind(undefined, req, res));
 });
 
 app.get('/clusters/:id/parts', clusterByName, function(req, res) {
     req.cluster.get().then((r) => res.json(r))
-    .fail(errorHandler);
+    .fail(errorHandler.bind(undefined, req, res));
 });
 
 app.post('/clusters/:id/export', [clusterByName, jsonParser], function(req, res) {
@@ -72,7 +72,7 @@ app.post('/clusters/:id/export', [clusterByName, jsonParser], function(req, res)
         res.set('Content-type', "application/json");
         res.send(objs);
     })
-    .fail(errorHandler);
+    .fail(errorHandler.bind(undefined, req, res));
 });
 
 app.get('/templates', function(req, res) {
@@ -80,6 +80,6 @@ app.get('/templates', function(req, res) {
     .then(function(objs) {
         res.json(objs);
     })
-    .fail(errorHandler);
+    .fail(errorHandler.bind(undefined, req, res));
 });
 app.listen(8101, () => log.info('Example app listening on port 8101!'));
