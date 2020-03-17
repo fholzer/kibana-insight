@@ -179,6 +179,10 @@ export default class Exporter extends Component {
         .catch(err => console.log(err));
     }
 
+    onResetClick = () => {
+        this.setState(prev => ({ stagedGraph: ObjectGraph.empty() }))
+    }
+
     updateSelectGraph() {
         this.setState(prev => {
             if(!prev.filterEntity || !prev.cluster.graph) {
@@ -330,6 +334,10 @@ export default class Exporter extends Component {
                                 floated="right"
                                 style={{ marginBottom: "1em" }}
                                 onClick={this.onDownloadClick}>Download</Button>
+                            <Button
+                                floated="right"
+                                style={{ marginBottom: "1em" }}
+                                onClick={this.onResetClick}>Reset</Button>
                             <Divider clearing/>
                             <ObjectList cluster={this.state.cluster} graph={this.state.stagedGraph} />
                         </Grid.Column>
