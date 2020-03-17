@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Segment, Table } from 'semantic-ui-react';
+import { Container, Segment, Table, Form, Checkbox } from 'semantic-ui-react';
 import Config from './Config';
 
 const MANAGED_PREFIXES = [
@@ -7,12 +7,16 @@ const MANAGED_PREFIXES = [
     "filebeat-",
     "metricbeat-",
     "heartbeat-",
-    "packetbeat-"
+    "packetbeat-",
+    "winlogbeat-",
+    "cloudflarebeat-"
 ];
 
 export default class TemplateOverview extends Component {
     state = {
-        templates: true
+        templates: true,
+        showManaged: false,
+        showSystem: false
     }
 
     componentDidMount() {
@@ -31,20 +35,20 @@ export default class TemplateOverview extends Component {
         });
     }
 
-    renderTemplateTable(data, sys, ignoreManaged, ignoreAbsence) {
+    renderTemplateTable(data, showSystem, showManaged, ignoreAbsence) {
         const clusters = data.clusters.filter(e => e !== null);
         const clusterNames = clusters.map(c => c.name);
         const clusterHeaders = clusterNames.map(c => (<Table.HeaderCell key={c} content={c}/>));
         clusterHeaders.unshift((<Table.HeaderCell key="-1"/>));
 
         var templates = data.allTemplates;
-        if(sys !== true) {
+        if(showSystem !== true) {
             templates = templates.filter(t => t.substring(0, 1) !== ".")
         }
-        if(ignoreManaged === true) {
+        if(showManaged !== true) {
             templates = templates.filter(t => {
                 for(let p of MANAGED_PREFIXES) {
-                    if(templates.startsWith(p)) {
+                    if(t.startsWith(p)) {
                         return false;
                     }
                 }
@@ -95,8 +99,19 @@ export default class TemplateOverview extends Component {
         return (<Container text><Segment>{content}</Segment></Container>);
     }
 
+    onCheckboxChanged = (e, { name }) => {
+        this.setState(prev => ({
+            [name]: !prev[name]
+        }));
+    }
+
     render() {
-        const templates = this.state.templates;
+        const {
+            showManaged,
+            showSystem,
+            templates
+        } = this.state;
+
         if(templates === true) {
             return this.renderSegment(<p>loading...</p>);
         }
@@ -106,6 +121,20 @@ export default class TemplateOverview extends Component {
             return this.renderSegment(<p>Error while loading data.</p>);
         }
 
-        return this.renderSegment(this.renderTemplateTable(templates));
+        const table = this.renderTemplateTable(templates, showSystem, showManaged);
+
+        return (
+            <Container text>
+                <Segment>
+                <Form>
+                    <Form.Group widths='equal' inline>
+                            <Form.Checkbox name="showManaged" label="Show managed templates" onChange={this.onCheckboxChanged} checked={this.state.showManaged} />
+                            <Form.Checkbox name="showSystem" label="Show system templates" onChange={this.onCheckboxChanged} checked={this.state.showSystem} />
+                    </Form.Group>
+                </Form>
+                </Segment>
+                <Segment>{table}</Segment>
+            </Container>
+        )
     }
 }
