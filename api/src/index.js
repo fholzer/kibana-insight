@@ -46,6 +46,7 @@ app.get('/clusters', function(req, res) {
             return {
                 name: e.getName(),
                 url: e.getUrl(),
+                kibana: e.getKibanaUrl(),
                 version: e.getLastKnownVersion()
             }
         }));

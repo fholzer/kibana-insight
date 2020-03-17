@@ -58,6 +58,10 @@ module.exports = class ObjectClient {
         return this.cluster.host;
     }
 
+    getKibanaUrl() {
+        return this.cluster.kibana;
+    }
+
     getLastKnownVersion() {
         return this.lastKnownVersion;
     }

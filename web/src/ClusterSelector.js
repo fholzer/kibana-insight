@@ -9,7 +9,10 @@ export default class ClusterSelector extends Component {
                 <Card.Content>
                     <Card.Header>{cluster.name}</Card.Header>
                     <Card.Meta>Version {cluster.version}</Card.Meta>
-                    <Card.Description>{cluster.url}</Card.Description>
+                    <Card.Description>
+                        <a target="_blank" rel="noopener noreferrer" href={cluster.kibana}>{cluster.kibana}</a><br/>
+                        <a target="_blank" rel="noopener noreferrer" href={cluster.url}>{cluster.url}</a>
+                    </Card.Description>
                 </Card.Content>
                 <Card.Content extra>
                     <div className='ui two buttons'>
