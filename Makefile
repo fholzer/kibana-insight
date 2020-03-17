@@ -1,6 +1,6 @@
 # KIBANA_INSIGHT_PROD_SERVER should be set as environment variable
 SERVER=$(KIBANA_INSIGHT_PROD_SERVER)
-API_FILES_SRC=api/config.json api/package.json api/package-lock.json api/lib/
+API_FILES_SRC=api/config.json api/package.json api/package-lock.json api/src/
 API_FILES_SCAN=$(shell find $(API_FILES_SRC) -type f)
 API_FILES_DEPS=api/node_modules
 API_FILES_PKG=$(API_FILES_SRC) $(API_FILES_DEPS)
@@ -14,7 +14,6 @@ package: package-api package-web
 package-api: api.tar.gz
 
 api.tar.gz: $(API_FILES_SCAN)
-	cd api && npm run build
 	tar czf $@ $(API_FILES_PKG)
 
 .PHONY: package-web
