@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Segment, Table, Form, Checkbox } from 'semantic-ui-react';
+import { Container, Segment, Table, Form } from 'semantic-ui-react';
 import Config from './Config';
 
 const MANAGED_PREFIXES = [
