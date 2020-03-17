@@ -1,6 +1,7 @@
 const elasticsearch = require('elasticsearch');
     q = require('q'),
     TYPE = require('./ObjectTypes'),
+    SemVer = require('semver/classes/semver'),
     log = require('log4js').getLogger('ObjectClient');
 
 const DEFAULT_MAXAGE = 1000 * 60 * 5;
@@ -8,29 +9,69 @@ const DASHBOARD_ALLOWED_CHILD_TYPES = [
     TYPE.VISUALIZATION,
     TYPE.SEARCH
 ];
+const ES_VER_6 = new SemVer("6.0.0");
+const ES_VER_7 = new SemVer("7.0.0");
 
 module.exports = class ObjectClient {
     constructor(esConfig, cluster) {
         this.config = esConfig;
         this.cluster = cluster;
-        var c = Object.assign({}, esConfig.client, cluster.client, { host: cluster.host })
-        this.client = new elasticsearch.Client(c);
         this.cache = null;
+        this.lastKnownVersion = "unknown";
+        this.client = this.createClient();
+    }
+
+    async createClient() {
+        var conf = Object.assign({}, this.config.client, this.cluster.client, { host: this.cluster.host })
+        var client = new elasticsearch.Client(conf);
+
+        log.trace(`Sending version probe for "${this.cluster.name}"`);
+        var info = await client.info();
+        var cver = new SemVer(info.version.number);
+        this.lastKnownVersion = info.version.number;
+
+        var ver = "7.4";
+        if(ES_VER_6.compare(cver) === 1) {
+            ver = "5.6";
+        } else if(ES_VER_7.compare(cver) === 1) {
+            ver = "6.8";
+        }
+
+        conf = Object.assign({ apiVersion: ver }, this.config.client, this.cluster.client, { host: this.cluster.host })
+        client = new elasticsearch.Client(conf);
+        log.debug(`Cluster ${this.cluster.name} is running version ${info.version.number}, using apiVersion ${ver}`);
+        return client;
+    }
+
+    async getClient() {
+        if(!this.client) {
+            this.client = this.createClient();
+        }
+        return await this.client;
     }
 
     getName() {
         return this.cluster.name;
     }
 
-    getKibanaObjects(type) {
-        return q.ninvoke(this.client, "search", {
+    getUrl() {
+        return this.cluster.host;
+    }
+
+    getLastKnownVersion() {
+        return this.lastKnownVersion;
+    }
+
+    async getKibanaObjects(type) {
+        var client = await this.getClient();
+        log.trace(`Searching cluster "${this.cluster.name}" for objects of type "${type}"`);
+        var res = await client.search({
             index: this.cluster.index || '.kibana',
             q: 'type:' + type,
             size: this.config.searchSize
-        }).get(0).then(function(res) {
-            log.debug("got " + res.hits.hits.length + " objects of type " + type);
-            return res;
         });
+        log.debug("got " + res.hits.hits.length + " objects of type " + type);
+        return res;
     }
 
     kibanaObjectMapper(type, search) {
@@ -68,14 +109,15 @@ module.exports = class ObjectClient {
         }));
     }
 
-    fetchTemplates() {
-        return q.ninvoke(this.client.indices, "getTemplate", { name: "*" })
-        .get(0).then((res) => {
-            return {
-                templates: res,
-                templateList: Object.getOwnPropertyNames(res)
-            };
-        });
+    async fetchTemplates() {
+        var client = await this.getClient();
+        log.trace(`Fetching templates for "${this.cluster.name}"`);
+        var res = await client.indices.getTemplate({ name: "*" });
+
+        return {
+            templates: res,
+            templateList: Object.getOwnPropertyNames(res)
+        };
     }
 
     fetch() {

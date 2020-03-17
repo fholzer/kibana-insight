@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import { Route, NavLink } from "react-router-dom";
+import { Route } from "react-router-dom";
+import { Container, Segment, Header, Grid } from 'semantic-ui-react';
 import Config from './Config';
-import { Menu, Container, Grid } from 'semantic-ui-react';
-import ClusterSelectionDropdown from './ClusterSelectionDropdown';
-import ObjectGraph from './ObjectGraph';
 import GraphStats from './GraphStats';
+import ObjectGraph from './ObjectGraph';
 import Browser from './Browser';
 import Exporter from './Exporter';
 
@@ -50,33 +49,38 @@ export default class ClusterView extends Component {
 
     handleMenuClick = (e, { name }) => this.setState({ activeMenu: name })
 
+    renderSegment(child, header) {
+        if(header) {
+            header = <Header as="h1" attached="top">{header}</Header>
+        }
+        const bottomProps = header ? { attached: "bottom" } : {};
+        return (
+            <Container className="clusterselector">
+                {header}
+                <Segment {...bottomProps}>{child}</Segment>
+            </Container>
+        )
+    }
+
     render() {
-        if(this.state.clusters === true) {
+        const { cluster } = this.state;
+        if(cluster === true) {
             return this.renderSegment(<p>loading...</p>);
         }
-        if(this.state.clusters === false) {
+        if(cluster === false) {
             return this.renderSegment(<p>Error while loading data.</p>);
         }
 
-        const graph = this.state.cluster.graph;
-        const cname = this.props.match.params.cluster;
+        const graph = cluster.graph;
         return (
-            <div>
-                <Menu>
-                    <Route path="/:cluster?/:app?" item component={ClusterSelectionDropdown}/>
-                    <Menu.Item as={NavLink} to={`/${cname}/browser`}>Browser</Menu.Item>
-                    <Menu.Item as={NavLink} to={`/${cname}/exporter`}>Exporter</Menu.Item>
-                </Menu>
+            <Container style={{ marginTop: '3em' }}>
+                <Grid centered>
+                    <GraphStats graph={graph} size="tiny"/>
+                </Grid>
 
-                <Container style={{ marginTop: '3em' }}>
-                    <Grid centered>
-                        <GraphStats graph={graph} size="tiny"/>
-                    </Grid>
-
-                    <Route path="/:cluster/browser/:filter?" component={this.renderBrowser}/>
-                    <Route path="/:cluster/exporter/:filter?" component={this.renderExporter}/>
-                </Container>
-            </div>
+                <Route path="/cluster/:cluster/browser/:filter?" component={this.renderBrowser}/>
+                <Route path="/cluster/:cluster/exporter/:filter?" component={this.renderExporter}/>
+            </Container>
         );
     }
     renderBrowser = (props) => <Browser {...props} cluster={this.state.cluster} />

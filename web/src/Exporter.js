@@ -90,7 +90,6 @@ export default class Exporter extends Component {
             stagedGraph: ObjectGraph.empty(),
             exportable
         };
-        //next.filteredGraph = Browser.generateFilteredGraph(Object.assign({}, this.state, next));
         this.setState(next);
     }
 
@@ -112,9 +111,9 @@ export default class Exporter extends Component {
         let types = FILTER_TYPE_LIST.filter(e => e.id === filterType);
         if(types.length < 1) {
             console.log("setting default filter")
-            let target = "/" + this.props.match.params.cluster
+            let target = "/cluster/" + this.props.match.params.cluster
                 + "/exporter/none";
-            this.props.history.push(target);
+            this.props.history.replace(target);
             return
         }
 
@@ -253,7 +252,7 @@ export default class Exporter extends Component {
         let match = FILTER_TYPE_LIST.filter(e => e.id === value);
         match = match[0];
 
-        let target = "/" + this.props.match.params.cluster
+        let target = "/cluster/" + this.props.match.params.cluster
             + "/exporter/" + match.id;
         this.props.history.push(target);
     }
@@ -263,7 +262,7 @@ export default class Exporter extends Component {
             return;
         }
 
-        let target = "/" + this.props.match.params.cluster
+        let target = "/cluster/" + this.props.match.params.cluster
             + "/exporter/" + value;
         this.props.history.push(target);
     }

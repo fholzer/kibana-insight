@@ -40,7 +40,20 @@ const errorHandler = function(req, res, err) {
 };
 
 //app.use(cors(config.cors));
-app.get('/clusters', (req, res) => res.json(config.elasticsearch.clusters.map((h) => h.name)));
+app.get('/clusters', function(req, res) {
+    try {
+        res.json(clients.map(e => {
+            return {
+                name: e.getName(),
+                url: e.getUrl(),
+                version: e.getLastKnownVersion()
+            }
+        }));
+    } catch(err) {
+        log.error("Failed to load cluster details.");
+        res.sendStatus(500);
+    }
+});
 
 app.get('/clusters/:id', clusterByName, function(req, res) {
     req.cluster.get().then((r) => {

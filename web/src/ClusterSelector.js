@@ -1,55 +1,35 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { Route } from "react-router-dom";
-import { Menu, Container, Segment, Header } from 'semantic-ui-react';
-import Config from './Config';
-import ClusterSelectionDropdown from './ClusterSelectionDropdown';
+import { Link } from "react-router-dom";
+import { Container, Segment, Header, Card, Button } from 'semantic-ui-react';
 
 export default class ClusterSelector extends Component {
-    state = {
-        clusters: true
-    }
-
-    componentDidMount() {
-        fetch(Config.apiBaseUrl + '/clusters')
-        .then((res) => {
-            if(!res.ok) {
-                console.log(res);
-                this.setState({ clusters: false });
-            }
-            return res.json();
-        })
-        .then((json) => this.setState({ clusters: json }))
-        .catch((err) => {
-            console.log(err);
-            this.setState({ clusters: false });
-        });
-    }
-
-    onClick = c => {
-        this.props.history.push("/" + c);
-    }
-
-    renderSegment(child, header) {
-        if(header) {
-            header = <Header as="h1" attached="top">{header}</Header>
-        }
-        const bottomProps = header ? { attached: "bottom" } : {};
+    clusterCardMapper = (cluster) => {
         return (
-            <Container className="clusterselector">
-                {header}
-                <Segment {...bottomProps}>{child}</Segment>
-            </Container>
-        )
+            <Card key={cluster.name}>
+                <Card.Content>
+                    <Card.Header>{cluster.name}</Card.Header>
+                    <Card.Meta>Version {cluster.version}</Card.Meta>
+                    <Card.Description>{cluster.url}</Card.Description>
+                </Card.Content>
+                <Card.Content extra>
+                    <div className='ui two buttons'>
+                        <Button as={Link} to={`/cluster/${cluster.name}/browser`}>Browse</Button>
+                        <Button as={Link} to={`/cluster/${cluster.name}/exporter`}>Export</Button>
+                    </div>
+                </Card.Content>
+            </Card>
+        );
     }
 
     render() {
+        const cards = this.props.clusters.map(this.clusterCardMapper);
         return (
-            <div>
-                <Menu>
-                    <Route path="/:cluster?/:app?" item component={ClusterSelectionDropdown}/>
-                </Menu>
-            </div>
+            <Container className="clusterselector">
+                <Header as="h1" attached="top">Select a cluster</Header>
+                <Segment basic>
+                <Card.Group centered>{cards}</Card.Group>
+                </Segment>
+            </Container>
         );
     }
 }

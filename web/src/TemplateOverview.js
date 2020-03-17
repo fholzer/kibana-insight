@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Route } from "react-router-dom";
 import { Container, Segment, Table } from 'semantic-ui-react';
 import Config from './Config';
 
@@ -101,7 +100,9 @@ export default class TemplateOverview extends Component {
         if(templates === true) {
             return this.renderSegment(<p>loading...</p>);
         }
-        if(templates === false) {
+
+        const numClusters = templates ? templates.clusters.filter(e => e !== null).length : 0;
+        if(templates === false || numClusters < 1) {
             return this.renderSegment(<p>Error while loading data.</p>);
         }
 

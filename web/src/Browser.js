@@ -90,9 +90,9 @@ export default class Browser extends Component {
 
         let types = FILTER_TYPE_LIST.filter(e => e.id === filterType);
         if(types.length < 1) {
-            let target = "/" + this.props.match.params.cluster
+            let target = "/cluster/" + this.props.match.params.cluster
                 + "/browser/none";
-            this.props.history.push(target);
+            this.props.history.replace(target);
             return
         }
 
@@ -111,7 +111,7 @@ export default class Browser extends Component {
         let match = FILTER_TYPE_LIST.filter(e => e.id === value);
         match = match[0];
 
-        let target = "/" + this.props.match.params.cluster
+        let target = "/cluster/" + this.props.match.params.cluster
             + "/browser/" + match.id;
         this.props.history.push(target);
     }
@@ -121,7 +121,7 @@ export default class Browser extends Component {
             return;
         }
 
-        let target = "/" + this.props.match.params.cluster
+        let target = "/cluster/" + this.props.match.params.cluster
             + "/browser/" + value;
         this.props.history.push(target);
     }
