@@ -5,6 +5,7 @@ const nconf = require('nconf'),
     bodyParser = require('body-parser'),
     ObjectClient = require('./ObjectClient'),
     TemplateCheck = require('./templateCheck'),
+    MappingCheckScheduler = require('./MappingCheckScheduler'),
     log4js = require('log4js');
 
 log4js.getLogger().level = 'debug';
@@ -17,6 +18,8 @@ const config = nconf.argv()
 
 const clients = config.elasticsearch.clusters.map((c) => new ObjectClient(config.elasticsearch, c));
 const templateCheck = TemplateCheck(clients);
+const mappingCheck = new MappingCheckScheduler(config, clients);
+mappingCheck.startScheduler();
 
 const clusterByName = function(req, res, next) {
     const idx = config.elasticsearch.clusters.findIndex(e => e.name === req.params.id);
@@ -89,11 +92,21 @@ app.post('/clusters/:id/export', [clusterByName, jsonParser], function(req, res)
     .fail(errorHandler.bind(undefined, req, res));
 });
 
-app.get('/templates', function(req, res) {
-    templateCheck()
-    .then(function(objs) {
-        res.json(objs);
-    })
-    .fail(errorHandler.bind(undefined, req, res));
+app.get('/templates', async function(req, res) {
+    try {
+        res.json(await templateCheck());
+    } catch(ex) {
+        errorHandler(req, res, ex);
+    }
 });
-app.listen(8101, () => log.info('Example app listening on port 8101!'));
+
+app.get('/mapping', async function(req, res) {
+    try {
+        res.json(await mappingCheck.get());
+    } catch(ex) {
+        errorHandler(req, res, ex);
+    }
+});
+
+let port = process.env.PORT ? process.env.PORT : 8101;
+app.listen(port, () => log.info(`Example app listening on port ${port}!`));

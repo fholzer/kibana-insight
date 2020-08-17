@@ -5,31 +5,34 @@ module.exports = function(clients) {
     var data;
 
     const templateMapper = function(obj) {
-        if(!obj.mappings) return "0".repeat(64);
+        if(!obj.mappings) {
+            return "0".repeat(64);
+        }
+
         var ser = JSON.stringify(obj.mappings);
         var shasum = crypto.createHash('sha256');
+
         shasum.update(ser);
         return shasum.digest("hex");
     };
 
-    const clusterMapper = function(client) {
-        return client.get()
-            .get("templates")
-            .then(t => {
-                var hashes = {};
-                for(let n of Object.getOwnPropertyNames(t.templates)) {
-                    hashes[n] = templateMapper(t.templates[n]);
-                }
-                return {
-                    name: client.getName(),
-                    templates: hashes,
-                    templateList: t.templateList
-                };
-            })
-            .catch(e => {
-                log.error(`Failed to fetch or process templates for cluster "${client.cluster.name}"`, e);
-                return null;
-            });
+    const clusterMapper = async function(client) {
+        try {
+            let cache = await client.get();
+            let t = cache.templates;
+            var hashes = {};
+            for(let n of Object.getOwnPropertyNames(t.templates)) {
+                hashes[n] = templateMapper(t.templates[n]);
+            }
+            return {
+                name: client.getName(),
+                templates: hashes,
+                templateList: t.templateList
+            };
+        } catch(e) {
+            log.error(`Failed to fetch or process templates for cluster "${client.cluster.name}"`, e);
+            return null;
+        }
     };
 
     const loadData = async function() {
@@ -47,11 +50,9 @@ module.exports = function(clients) {
     };
 
     const updateData = function() {
-        data = q(loadData());
+        data = Promise.resolve(loadData());
     };
-    data = q(loadData());
-    data.done();
+    data = Promise.resolve(loadData());
     setInterval(updateData, 60 * 60 * 1000);
-
     return () => data;
 };

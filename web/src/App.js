@@ -6,6 +6,7 @@ import Config from './Config';
 import ClusterSelector from './ClusterSelector';
 import ClusterView from './ClusterView';
 import TemplateOverview from  './TemplateOverview';
+import MappingOverview from  './MappingOverview';
 
 class App extends Component {
     state = {
@@ -34,7 +35,7 @@ class App extends Component {
 
     renderSegment(child, header) {
         if(header) {
-            header = <Header as="h1" attached="top">{header}</Header>
+            header = (<Header as="h1" attached="top">{header}</Header>);
         }
         const bottomProps = header ? { attached: "bottom" } : {};
         return (
@@ -63,6 +64,7 @@ class App extends Component {
                 <Menu>
                     <Menu.Item as={NavLink} to="/" exact>Cluster Selection</Menu.Item>
                     <Menu.Menu position="right">
+                        <Menu.Item as={NavLink} to="/mappings">Mapping</Menu.Item>
                         <Menu.Item as={NavLink} to="/templates">Templates</Menu.Item>
                     </Menu.Menu>
                 </Menu>
@@ -71,6 +73,7 @@ class App extends Component {
                     <Switch>
                         <Redirect exact from="/" to="/cluster"/>
                         <Route path="/templates" component={TemplateOverview}/>
+                        <Route path="/mappings" component={MappingOverview}/>
                         <Route path="/cluster" exact component={this.renderClusterSelector}/>
                         <Route path="/cluster/:cluster" component={this.renderClusterView}/>
                     </Switch>
