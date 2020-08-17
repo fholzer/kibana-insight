@@ -1,5 +1,4 @@
 const elasticsearch = require('elasticsearch');
-    q = require('q'),
     TYPE = require('./ObjectTypes'),
     SemVer = require('semver/classes/semver'),
     log = require('log4js').getLogger('ObjectClient');
@@ -124,110 +123,110 @@ module.exports = class ObjectClient {
         };
     }
 
-    fetch() {
+    async fetch() {
         log.info(`Fetching data for "${this.cluster.name}"`);
-        return q.all([
+        [templates, indexPatterns, searches, visualizations, dashboards] = await Promise.all([
             this.fetchTemplates(),
             this.getKibanaObjects(TYPE.INDEX_PATTERN),
             this.getKibanaObjects(TYPE.SEARCH),
             this.getKibanaObjects(TYPE.VISUALIZATION),
-            this.getKibanaObjects(TYPE.DASHBOARD)])
-        .spread((templates, indexPatterns, searches, visualizations, dashboards) => {
-            var nodes = [].concat(
-                this.kibanaObjectMapper(TYPE.INDEX_PATTERN, indexPatterns),
-                this.kibanaObjectMapper(TYPE.SEARCH, searches),
-                this.kibanaObjectMapper(TYPE.VISUALIZATION, visualizations),
-                this.kibanaObjectMapper(TYPE.DASHBOARD, dashboards)
-            );
-            var edges = [];
-            var addEdge = function(from, to) {
-                edges.push({ source: from, target: to });
-            };
+            this.getKibanaObjects(TYPE.DASHBOARD)
+        ]);
 
-            searches.hits.hits.forEach((s) => {
-                var ip = [];
-                if(!s._source.references) {
-                    ip.push(TYPE.INDEX_PATTERN + ':' + JSON.parse(s._source.search.kibanaSavedObjectMeta.searchSourceJSON).index);
-                } else {
-                    for(let ref of s._source.references) {
-                        ip.push(`${ref.type}:${ref.id}`);
+        var nodes = [].concat(
+            this.kibanaObjectMapper(TYPE.INDEX_PATTERN, indexPatterns),
+            this.kibanaObjectMapper(TYPE.SEARCH, searches),
+            this.kibanaObjectMapper(TYPE.VISUALIZATION, visualizations),
+            this.kibanaObjectMapper(TYPE.DASHBOARD, dashboards)
+        );
+        var edges = [];
+        var addEdge = function(from, to) {
+            edges.push({ source: from, target: to });
+        };
+
+        searches.hits.hits.forEach((s) => {
+            var ip = [];
+            if(!s._source.references) {
+                ip.push(TYPE.INDEX_PATTERN + ':' + JSON.parse(s._source.search.kibanaSavedObjectMeta.searchSourceJSON).index);
+            } else {
+                for(let ref of s._source.references) {
+                    ip.push(`${ref.type}:${ref.id}`);
+                }
+            }
+            ip.forEach(e => addEdge(s._id, e));
+        });
+
+        visualizations.hits.hits.forEach((v) => {
+            if(v._source.visualization.savedSearchId) {
+                let sid = TYPE.SEARCH + ':' + v._source.visualization.savedSearchId;
+                addEdge(v._id, sid);
+            }
+
+            if(!v._source.references) {
+                var metaSource = v._source.visualization.kibanaSavedObjectMeta.searchSourceJSON;
+                if(metaSource) {
+                    let meta = JSON.parse(metaSource);
+                    if(meta.index) {
+                        let ip = TYPE.INDEX_PATTERN + ':' + meta.index;
+                        addEdge(v._id, ip);
                     }
                 }
-                ip.forEach(e => addEdge(s._id, e));
-            });
+            } else {
+                v._source.references.forEach(e => {
+                    addEdge(v._id, `${e.type}:${e.id}`);
+                })
+            }
+        });
 
-            visualizations.hits.hits.forEach((v) => {
-                if(v._source.visualization.savedSearchId) {
-                    let sid = TYPE.SEARCH + ':' + v._source.visualization.savedSearchId;
-                    addEdge(v._id, sid);
+        dashboards.hits.hits.forEach((d) => {
+            let refs;
+            if(d._source.references) {
+                refs = d._source.references;
+            } else {
+                if(d._source.dashboard.panelsJSON) {
+                    refs = JSON.parse(d._source.dashboard.panelsJSON);
                 }
+            }
 
-                if(!v._source.references) {
-                    var metaSource = v._source.visualization.kibanaSavedObjectMeta.searchSourceJSON;
-                    if(metaSource) {
-                        let meta = JSON.parse(metaSource);
-                        if(meta.index) {
-                            let ip = TYPE.INDEX_PATTERN + ':' + meta.index;
-                            addEdge(v._id, ip);
-                        }
-                    }
-                } else {
-                    v._source.references.forEach(e => {
-                        addEdge(v._id, `${e.type}:${e.id}`);
-                    })
-                }
-            });
-
-            dashboards.hits.hits.forEach((d) => {
-                let refs;
-                if(d._source.references) {
-                    refs = d._source.references;
-                } else {
-                    if(d._source.dashboard.panelsJSON) {
-                        refs = JSON.parse(d._source.dashboard.panelsJSON);
-                    }
-                }
-
-                if(refs) {
-                    refs.filter((v) => DASHBOARD_ALLOWED_CHILD_TYPES.indexOf(v.type) !== -1).forEach((c) => {
-                        let cid = c.type + ':' + c.id;
-                        addEdge(d._id, cid);
-                    });
-                }
-            });
-
-            // find objects with references to missing objects
-            var missing = edges.filter((e) => nodes.findIndex((n) => n.id === e.target) === -1);
-            if(missing.length > 0) {
-                nodes.push({ id: TYPE.MISSING, type: TYPE.MISSING, title: "Missing" });
-                missing.forEach((e) => {
-                    e.target = TYPE.MISSING;
+            if(refs) {
+                refs.filter((v) => DASHBOARD_ALLOWED_CHILD_TYPES.indexOf(v.type) !== -1).forEach((c) => {
+                    let cid = c.type + ':' + c.id;
+                    addEdge(d._id, cid);
                 });
             }
-
-            log.debug("Got " + nodes.length + " nodes, " + edges.length + " edges");
-            return {
-                templates,
-                nodes,
-                edges
-            };
         });
+
+        // find objects with references to missing objects
+        var missing = edges.filter((e) => nodes.findIndex((n) => n.id === e.target) === -1);
+        if(missing.length > 0) {
+            nodes.push({ id: TYPE.MISSING, type: TYPE.MISSING, title: "Missing" });
+            missing.forEach((e) => {
+                e.target = TYPE.MISSING;
+            });
+        }
+
+        log.debug("Got " + nodes.length + " nodes, " + edges.length + " edges");
+        return {
+            templates,
+            nodes,
+            edges
+        };
     }
 
-    exportObjects(ids) {
+    async exportObjects(ids) {
         var docs = ids.map(i => ({ _id: i }));
 
-        return q.ninvoke(this.client, "mget", {
+        let res = await this.client.mget({
             index: this.cluster.index || '.kibana',
             body: { docs }
-        }).get(0).then(res => {
-            let missing = res.docs.filter(d => d.found !== true);
-            if(missing.length > 0) {
-                log.error("Error while exporting objects. Some objects couldn't be found:", missing);
-                throw new Error("Some objects couldn't be found!")
-            }
-            return res.docs.map(o => this.exportObjectMapper(o));
         });
+
+        let missing = res.docs.filter(d => d.found !== true);
+        if(missing.length > 0) {
+            log.error("Error while exporting objects. Some objects couldn't be found:", missing);
+            throw new Error("Some objects couldn't be found!")
+        }
+        return res.docs.map(o => this.exportObjectMapper(o));
     }
 
     exportObjectMapper = obj => {

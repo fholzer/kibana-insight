@@ -59,8 +59,9 @@ app.get('/clusters', function(req, res) {
     }
 });
 
-app.get('/clusters/:id', clusterByName, function(req, res) {
-    req.cluster.get().then((r) => {
+app.get('/clusters/:id', clusterByName, async function(req, res) {
+    try {
+        let r = await req.cluster.get();
         let cfg = Object.assign({}, config.elasticsearch.clusters[req.clusterid]);
         if(cfg.client) {
             delete cfg.client;
@@ -69,27 +70,32 @@ app.get('/clusters/:id', clusterByName, function(req, res) {
             config: cfg,
             parts: r,
         });
-    })
-    .fail(errorHandler.bind(undefined, req, res));
+    } catch(e) {
+        errorHandler(req, res, e));
+    }
 });
 
-app.get('/clusters/:id/parts', clusterByName, function(req, res) {
-    req.cluster.get().then((r) => res.json(r))
-    .fail(errorHandler.bind(undefined, req, res));
+app.get('/clusters/:id/parts', clusterByName, async function(req, res) {
+    try {
+        res.json(await req.cluster.get());
+    } catch(e) {
+        errorHandler(req, res, e));
+    }
 });
 
-app.post('/clusters/:id/export', [clusterByName, jsonParser], function(req, res) {
+app.post('/clusters/:id/export', [clusterByName, jsonParser], async function(req, res) {
     if(!req.body) {
         return res.sendStatus(400);
     }
 
-    req.cluster.exportObjects(req.body)
-    .then(function(objs) {
+    try {
+        let objs = await req.cluster.exportObjects(req.body)
         res.set('Content-disposition', 'attachment; filename=export.json');
         res.set('Content-type', "application/json");
         res.send(objs);
-    })
-    .fail(errorHandler.bind(undefined, req, res));
+    } catch(e) {
+        errorHandler(req, res, e));
+    }
 });
 
 app.get('/templates', async function(req, res) {
