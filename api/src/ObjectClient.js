@@ -125,7 +125,7 @@ module.exports = class ObjectClient {
 
     async fetch() {
         log.info(`Fetching data for "${this.cluster.name}"`);
-        [templates, indexPatterns, searches, visualizations, dashboards] = await Promise.all([
+        let [templates, indexPatterns, searches, visualizations, dashboards] = await Promise.all([
             this.fetchTemplates(),
             this.getKibanaObjects(TYPE.INDEX_PATTERN),
             this.getKibanaObjects(TYPE.SEARCH),
