@@ -9,12 +9,29 @@ module.exports = function(clients) {
             return "0".repeat(64);
         }
 
-        var ser = JSON.stringify(obj.mappings);
+        var ser = JSON.stringify(objectSorter(obj.mappings));
         var shasum = crypto.createHash('sha256');
 
         shasum.update(ser);
         return shasum.digest("hex");
     };
+
+    const objectSorter = function(obj) {
+        if(!(obj instanceof Object)) {
+            return obj;
+        } else if(obj instanceof String) {
+            return obj;
+        } else if(Array.isArray(obj)) {
+            return obj.slice().sort();
+        }
+
+        return Object.keys(obj)
+            .sort()
+            .reduce(function(acc, key) {
+                acc[key] = objectSorter(obj[key]);
+                return acc;
+            }, {});
+    }
 
     const clusterMapper = async function(client) {
         try {
