@@ -71,7 +71,7 @@ app.get('/clusters/:id', clusterByName, async function(req, res) {
             parts: r,
         });
     } catch(e) {
-        errorHandler(req, res, e));
+        errorHandler(req, res, e);
     }
 });
 
@@ -79,7 +79,7 @@ app.get('/clusters/:id/parts', clusterByName, async function(req, res) {
     try {
         res.json(await req.cluster.get());
     } catch(e) {
-        errorHandler(req, res, e));
+        errorHandler(req, res, e);
     }
 });
 
@@ -94,7 +94,7 @@ app.post('/clusters/:id/export', [clusterByName, jsonParser], async function(req
         res.set('Content-type', "application/json");
         res.send(objs);
     } catch(e) {
-        errorHandler(req, res, e));
+        errorHandler(req, res, e);
     }
 });
 
