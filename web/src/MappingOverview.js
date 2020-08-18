@@ -141,10 +141,10 @@ export default class MappingOverview extends Component {
         const table = this.renderMappingTable(okClusters);
 
         return (
-            <Container text>
+            <>
                 {messages}
                 <Segment>{table}</Segment>
-            </Container>
+            </>
         )
     }
 }
