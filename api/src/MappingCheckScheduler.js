@@ -90,7 +90,8 @@ module.exports = class MappingCheckScheduler {
 
         try {
             mappings = await client.indices.getMapping({
-                index: indexPattern
+                index: indexPattern,
+                includeTypeName: false
             });
         } catch(ex) {
             if(ex.status === 404) {
