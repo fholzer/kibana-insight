@@ -124,6 +124,7 @@ export default class TemplateOverview extends Component {
         const table = this.renderTemplateTable(templates, showSystem, showManaged);
 
         return (
+            <>
             <Container text>
                 <Segment>
                 <Form>
@@ -133,8 +134,9 @@ export default class TemplateOverview extends Component {
                     </Form.Group>
                 </Form>
                 </Segment>
-                <Segment>{table}</Segment>
             </Container>
+            <Segment>{table}</Segment>
+            </>
         )
     }
 }
