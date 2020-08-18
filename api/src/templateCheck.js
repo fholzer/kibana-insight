@@ -53,6 +53,7 @@ module.exports = function(clients) {
     };
 
     const loadData = async function() {
+        log.info("Updating template check data...");
         let clusters = [];
         for(let client of clients) {
             clusters.push(await clusterMapper(client));
@@ -60,6 +61,7 @@ module.exports = function(clients) {
 
         var allTemplates = [].concat.apply([], clusters.filter(c => c !== null).map(c => c.templateList));
         allTemplates = allTemplates.sort().filter((el, i, a) => i === a.indexOf(el) && el.length > 0);
+        log.info("Finished updating template check data");
         return {
             allTemplates,
             clusters

@@ -50,12 +50,14 @@ module.exports = class MappingCheckScheduler {
     }
 
     async updateCache() {
+        log.info("Updating mapping check data...");
         let res = this.check();
         try {
             await res;
         } finally {
             this.cache = res;
         }
+        log.info("Finished updating mapping check data...");
     }
 
     get() {
