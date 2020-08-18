@@ -71,7 +71,7 @@ export default class MappingOverview extends Component {
         clusterHeaders.unshift((<Table.HeaderCell key="-1"/>));
 
         const indexPatterns = clusters.reduce((acc, cur) => {
-            return cur.result.reduce((a, c) => acc.add(c.pattern));
+            return cur.result.reduce((a, c) => acc.add(c.pattern), null);
         }, new Set());
 
         const rows = [];
