@@ -76,8 +76,6 @@ module.exports = class MappingCheckScheduler {
             indexPatternsToCheck = await this.getIndexPatterns(client);
         }
 
-        log.debug(`Checking cluster ${cluster.getName()}, index patterns:`, indexPatternsToCheck)
-
         for(let p of [...indexPatternsToCheck]) {
             res.push({
                 pattern: p,
