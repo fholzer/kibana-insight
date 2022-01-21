@@ -16,7 +16,7 @@
     "elasticsearch": "^16.6.0",
     "express": "^4.16.3",
     "graph.js": "^1.21.1",
-    "log4js": "^6.1.2",
+    "log4js": "^6.4.0",
     "nconf": "^0.10.0",
     "semver": "^7.1.3"
   },
